@@ -71,12 +71,16 @@ def t_newline(t):
 
 # Error handling rule
 def t_error(t):
-	raise SyntaxError("Illegal character '%s' on line %d" % (t.value[0], t.lexer.lineno))
+	raise SyntaxError("Illegal character '%s' on line %d" % (t.value[0], t.lineno))
 
 # Build the lexer
 lexer = lex.lex()
 
+def reset_lexer():
+	lexer.lineno = 1
+
 def tokenize(contents):
+	reset_lexer()
 	lexer.input(contents)
 	tokens = []
 	while True:

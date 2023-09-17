@@ -14,7 +14,7 @@ class Constant(Ast):
 		return f"{self.__class__.__name__}({self.lineno}, {self.col_offset}, {self.value})"
 
 	def __str__(self):
-		return self.__repr__()
+		return str(self.value)
 
 class Variable(Ast):
 	"""Represents a variable."""
@@ -30,4 +30,4 @@ class Variable(Ast):
 		return f"{self.__class__.__name__}({self.lineno}, {self.col_offset}, {self.name})"
 
 	def __str__(self):
-		return self.__repr__()
+		return self.name

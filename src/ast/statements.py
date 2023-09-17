@@ -15,7 +15,7 @@ class FunCall(Ast):
 		return f"{self.__class__.__name__}({self.lineno}, {self.col_offset}, {self.name}, {self.args})"
 
 	def __str__(self):
-		return self.__repr__()
+		return f"{self.name}({', '.join(map(str, self.args))})"
 
 class FunDecl(Ast):
 	"""Represents a function declaration statement."""
@@ -33,23 +33,7 @@ class FunDecl(Ast):
 		return f"{self.__class__.__name__}({self.lineno}, {self.col_offset}, {self.name}, {self.args}, {self.body})"
 
 	def __str__(self):
-		return self.__repr__()
-
-class Sequence(Ast):
-	"""Represents a sequence of statements."""
-
-	def __init__(self, lineno, col_offset, statements):
-		super().__init__(lineno, col_offset)
-		self.statements = statements
-
-	def accept(self, visitor):
-		return visitor.visit_sequence(self)
-
-	def __repr__(self):
-		return f"{self.__class__.__name__}({self.lineno}, {self.col_offset}, {self.statements})"
-
-	def __str__(self):
-		return self.__repr__()
+		return f"{self.name}({', '.join(map(str, self.args))}) = {self.body}"
 
 class VarDecl(Ast):
 	"""Represents a variable declaration statement."""
@@ -66,4 +50,4 @@ class VarDecl(Ast):
 		return f"{self.__class__.__name__}({self.lineno}, {self.col_offset}, {self.name}, {self.value})"
 
 	def __str__(self):
-		return self.__repr__()
+		return f"{self.name} = {self.value}"

@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # PLY
-src/parser.out
-src/parsetab.py
+*.out
+**/parsetab.py
