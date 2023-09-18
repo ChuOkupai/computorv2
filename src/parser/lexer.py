@@ -4,13 +4,13 @@ import ply.lex as lex
 tokens = [
 	# Simple tokens
 		# Operators
+	'ADD',
 	'DIV',
 	'EQUALS',
-	'MINUS',
 	'MOD',
-	'MULT',
-	'PLUS',
+	'MUL',
 	'POW',
+	'SUB',
 		# Symbols
 	'COMMA',
 	'LBRACKET',
@@ -28,13 +28,13 @@ tokens = [
 
 # Regular expression rules for simple tokens
 	# Operators
+t_ADD = r'\+'
 t_DIV = r'\/'
 t_EQUALS = r'='
-t_MINUS = r'-'
 t_MOD = r'%'
-t_MULT = r'\*'
-t_PLUS = r'\+'
+t_MUL = r'\*'
 t_POW = r'\^'
+t_SUB = r'-'
 	# Symbols
 t_COMMA = r','
 t_LBRACKET = r'\['
