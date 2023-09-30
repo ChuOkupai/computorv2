@@ -1,5 +1,5 @@
 import sys
-from src.parser import lexer, parser, parse, tokenize
+from src.parser import parser, parse, tokenize
 
 if __name__ == '__main__':
 	contents = ''
@@ -7,16 +7,12 @@ if __name__ == '__main__':
 		line = input('... ' if contents else '> ')
 		contents += line + '\n'
 		try:
-			tokens = tokenize(contents)
 			ast = parse(contents)
-			for token in tokens:
-				print(token)
+			print('---> AST Dump')
+			print(repr(ast))
 			print(ast)
-			parser.restart()
 		except EOFError:
 			continue
 		except SyntaxError as e:
-			print('Raised SyntaxError', file=sys.stderr)
-			print(e, file=sys.stderr)
-			exit(1)
+			print("syntax error:", e, file=sys.stderr)
 		contents = ''

@@ -1,12 +1,12 @@
 import unittest
-from src.lexer import tokenize as tk
+from src.parser import tokenize as tk
 
 class TestLexer(unittest.TestCase):
 	"""This class contains tests for the Complex class."""
 
 	def test_operators(self):
-		expected = ['DIV', 'EQUALS', 'MINUS', 'MOD', 'MULT', 'PLUS', 'POW']
-		tokens = tk('/=-%*+^')
+		expected = ['ADD', 'DIV', 'EQUALS', 'MOD', 'MUL', 'POW', 'SUB']
+		tokens = tk('+/=%*^-')
 		for i, token in enumerate(tokens):
 			self.assertEqual(token.type, expected[i])
 
@@ -65,6 +65,6 @@ class TestLexer(unittest.TestCase):
 
 	def test_integration(self):
 		tokens = tk('varA = 1 - 3.5 * 4 / 5 ^ 6')
-		expected = ['ID', 'EQUALS', 'INT', 'MINUS', 'FLOAT', 'MULT', 'INT', 'DIV', 'INT', 'POW', 'INT']
+		expected = ['ID', 'EQUALS', 'INT', 'SUB', 'FLOAT', 'MUL', 'INT', 'DIV', 'INT', 'POW', 'INT']
 		for i, token in enumerate(tokens):
 			self.assertEqual(token.type, expected[i])

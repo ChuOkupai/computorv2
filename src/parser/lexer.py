@@ -1,5 +1,6 @@
 import sys
 import ply.lex as lex
+from src import ast
 
 tokens = [
 	# Simple tokens
@@ -75,6 +76,24 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
+
+def convert_to_binary_op(op):
+	operators = {
+		'+': ast.BinaryOpType.Add,
+		'/': ast.BinaryOpType.Div,
+		'%': ast.BinaryOpType.Mod,
+		'*': ast.BinaryOpType.Mul,
+		'^': ast.BinaryOpType.Pow,
+		'-': ast.BinaryOpType.Sub
+	}
+	return operators[op]
+
+def convert_to_unary_op(op):
+	operators = {
+		'-': ast.UnaryOpType.Neg,
+		'+': ast.UnaryOpType.Pos
+	}
+	return operators[op]
 
 def reset_lexer():
 	lexer.lineno = 1

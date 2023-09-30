@@ -1,20 +1,33 @@
 from abc import ABC, abstractmethod
+from src.ast import BinaryOp, Constant, FunCall, FunDecl, Identifier, UnaryOp, VarDecl
 
 class Visitor(ABC):
 	"""Represents a visitor for the AST."""
 
-	# Constants
-
 	@abstractmethod
-	def visit_litteral(self, element: Litteral) -> None:
-		pass
-
-	# Statements
-
-	@abstractmethod
-	def visit_assign(self, element: Assign) -> None:
+	def visit_constant(self, element: Constant) -> None:
 		pass
 
 	@abstractmethod
-	def visit_sequence(self, element: Sequence) -> None:
+	def visit_identifier(self, element: Identifier) -> None:
+		pass
+
+	@abstractmethod
+	def visit_vardecl(self, element: VarDecl) -> None:
+		pass
+
+	@abstractmethod
+	def visit_fundecl(self, element: FunDecl) -> None:
+		pass
+
+	@abstractmethod
+	def visit_funcall(self, element: FunCall) -> None:
+		pass
+
+	@abstractmethod
+	def visit_binaryop(self, element: BinaryOp) -> None:
+		pass
+
+	@abstractmethod
+	def visit_unaryop(self, element: UnaryOp) -> None:
 		pass
