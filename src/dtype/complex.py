@@ -10,7 +10,7 @@ class Complex:
 
 	def __init__(self, real=0.0, imag=0.0):
 		for i, arg in enumerate([real, imag]):
-			if not isinstance(arg, float | int):
+			if not isinstance(arg, (float, int)):
 				raise TypeError(f"Complex(): Argument {i + 1} must be a number.")
 		self.real = float(real)
 		self.imag = float(imag)
@@ -18,7 +18,7 @@ class Complex:
 	def _check_type(self, c, op, reverse=False):
 		if isinstance(c, Complex):
 			return c
-		if isinstance(c, float | int):
+		if isinstance(c, (float, int)):
 			return Complex(c)
 		args = [c, self] if reverse else [self, c]
 		raise unsupported_op(op, *args)
@@ -113,7 +113,7 @@ class Complex:
 	def __eq__(self, o):
 		if isinstance(o, Complex):
 			return self.real == o.real and self.imag == o.imag
-		if isinstance(o, float | int):
+		if isinstance(o, (float, int)):
 			return self.real == o and self.imag == 0
 		return False
 
