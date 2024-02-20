@@ -39,6 +39,22 @@ class FunDecl(Ast):
 	def __str__(self):
 		return f"{self.name}({', '.join(map(str, self.args))}) = {self.body}"
 
+class MatDecl(Ast):
+	"""Represents a matrix declaration statement."""
+
+	def __init__(self, rows: list):
+		self.rows = rows
+
+	def accept(self, visitor):
+		visitor.visit_matdecl(self)
+
+	def __repr__(self):
+		rows = repr(self.rows)
+		return f"{self.__class__.__name__}({rows})"
+
+	def __str__(self):
+		return f"[{';'.join(map(str, self.rows))}]"
+
 class VarDecl(Ast):
 	"""Represents a variable declaration statement."""
 

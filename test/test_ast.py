@@ -34,4 +34,6 @@ class TestAst(unittest.TestCase):
 
 	def test_unaryop(self):
 		self.assertEqual(str(UnaryOp(UnaryOpType.Neg, Constant(1))), '(-1)')
+		self.assertEqual(str(UnaryOp(UnaryOpType.Neg, Constant(1))), '-(1)')
 		self.assertEqual(str(UnaryOp(UnaryOpType.Pos, Constant(1))), '(+1)')
+		self.assertEqual(str(UnaryOp(UnaryOpType.Pos, Constant(1))), '+(1)')

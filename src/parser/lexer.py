@@ -1,6 +1,4 @@
-import sys
 import ply.lex as lex
-from src import ast
 
 tokens = [
 	# Simple tokens
@@ -48,8 +46,6 @@ t_SEMICOL = r';'
 t_ignore_COMMENT = r'\#.*'
 t_ignore_WHITESPACE = r'[^\S\r\n]+'
 
-# Regular expression rules for complex tokens
-
 def t_FLOAT(t):
 	r'inf|(\d+\.\d*|\.\d+)([eE][-+]?\d+)?|(\d+[eE][-+]?\d+)'
 	t.value = float(t.value)
@@ -76,24 +72,6 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
-
-def convert_to_binary_op(op):
-	operators = {
-		'+': ast.BinaryOpType.Add,
-		'/': ast.BinaryOpType.Div,
-		'%': ast.BinaryOpType.Mod,
-		'*': ast.BinaryOpType.Mul,
-		'^': ast.BinaryOpType.Pow,
-		'-': ast.BinaryOpType.Sub
-	}
-	return operators[op]
-
-def convert_to_unary_op(op):
-	operators = {
-		'-': ast.UnaryOpType.Neg,
-		'+': ast.UnaryOpType.Pos
-	}
-	return operators[op]
 
 def reset_lexer():
 	lexer.lineno = 1

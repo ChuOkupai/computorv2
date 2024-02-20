@@ -1,30 +1,57 @@
+import sys
 import ply.yacc as yacc
 from src import ast
-from src.parser.lexer import convert_to_binary_op, convert_to_unary_op, reset_lexer, tokens
+from src.parser.lexer import reset_lexer, tokens
 
 precedence = (
+	('right', 'EQUALS'),
 	('left', 'ADD', 'SUB'),
 	('left', 'MUL', 'DIV', 'MOD'),
 	('left', 'POW'),
-	('right', 'USUB', 'UADD'),
-	('left', 'QMARK')
+	('right', 'USUB', 'UADD')
 )
 
+_op_symbols = { 'ADD': '+', 'DIV': '/', 'EQUALS': '=', 'MOD': '%', 'MUL': '*', 'POW': '^', 'SUB': '-', 'UADD': '+', 'USUB': '-' }
+precedence_dict = { _op_symbols[token]: (i, e[0]) for i, e in enumerate(precedence) for token in e[1:] }
+
 def p_statement(p):
-	'''statement : expression
+	'''statement : expr
 		| fun_decl
 		| var_decl'''
 	p[0] = p[1]
 
-def p_expression(p):
-	'''expression : terminal'''
-	p[0] = p[1]
+def p_expr_group(p):
+	'''expr : LPAREN expr RPAREN'''
+	p[0] = p[2]
 
-def p_terminal(p):
-	'''terminal : constant
+def p_expr_terminal(p):
+	'''expr : constant
 		| variable
+		| implicit_mul
 		| matrix'''
 	p[0] = p[1]
+
+def p_expr_binary_op(p):
+	'''expr : expr ADD expr
+		| expr DIV expr
+		| expr MOD expr
+		| expr MUL expr
+		| expr POW expr
+		| expr SUB expr'''
+	p[0] = ast.BinaryOp(p[1], p[2], p[3])
+
+def p_expr_unary_op(p):
+	'''expr : SUB expr %prec USUB
+		| ADD expr %prec UADD'''
+	p[0] = ast.UnaryOp(p[1], p[2])
+
+def p_expr_implicit_mul(p):
+	'''implicit_mul : constant variable %prec MUL'''
+	p[0] = ast.BinaryOp(p[1], '*', p[2])
+
+def p_expr_fun_call(p):
+	'''expr : variable LPAREN arguments RPAREN'''
+	p[0] = ast.FunCall(p[1], p[3])
 
 def p_constant(p):
 	'''constant : FLOAT
@@ -36,63 +63,37 @@ def p_variable(p):
 	p[0] = ast.Identifier(p[1])
 
 def p_matrix(p):
-	'''matrix : LBRACKET matrix_rows_list RBRACKET'''
-	p[0] = p[2]
+	'''matrix : LBRACKET matrix_rows RBRACKET'''
+	p[0] = ast.MatDecl(p[2])
 
-def p_matrix_rows_list(p):
-	'''matrix_rows_list : matrix_row'''
-	p[0] = p[1]
+def p_matrix_rows(p):
+	'''matrix_rows : matrix_row'''
+	p[0] = [p[1]]
 
-def p_matrix_rows_list_append(p):
-	'''matrix_rows_list : matrix_rows_list SEMICOL matrix_row'''
+def p_matrix_rows_append(p):
+	'''matrix_rows : matrix_rows SEMICOL matrix_row'''
 	p[0] = p[1]
 	p[0].append(p[3])
 
 def p_matrix_row(p):
-	'''matrix_row : expressions_list'''
-	p[0] = p[1]
+	'''matrix_row : LBRACKET arguments RBRACKET'''
+	p[0] = p[2]
 
-def p_expressions_list(p):
-	'''expressions_list : expression'''
+def p_arguments(p):
+	'''arguments : expr'''
 	p[0] = [p[1]]
 
-def p_expression_list_append(p):
-	'''expressions_list : expressions_list COMMA expression'''
+def p_arguments_append(p):
+	'''arguments : arguments COMMA expr'''
 	p[0] = p[1]
 	p[0].append(p[3])
 
-def p_expression_fun_call(p):
-	'''expression : variable LPAREN expressions_list RPAREN'''
-	p[0] = ast.FunCall(p[1], p[3])
-
-def p_expression_binary_op(p):
-	'''expression : expression ADD expression
-		| expression DIV expression
-		| expression MOD expression
-		| expression MUL expression
-		| expression POW expression
-		| expression SUB expression'''
-	p[0] = ast.BinaryOp(p[1], convert_to_binary_op(p[2]), p[3])
-
-def p_expression_unary_op(p):
-	'''expression : SUB expression %prec USUB
-		| ADD expression %prec UADD'''
-	p[0] = ast.UnaryOp(convert_to_unary_op(p[1]), p[2])
-
-def p_expression_group(p):
-	'''expression : LPAREN expression RPAREN'''
-	p[0] = p[2]
-
-def p_expression_implicit_mul(p):
-	'''expression : terminal variable %prec MUL'''
-	p[0] = ast.BinaryOp(p[1], ast.BinaryOpType.Mul, p[2])
-
 def p_fun_decl(p):
-	'''fun_decl : variable LPAREN expressions_list RPAREN EQUALS expression'''
+	'''fun_decl : variable LPAREN arguments RPAREN EQUALS expr'''
 	p[0] = ast.FunDecl(p[1], p[3], p[6])
 
 def p_var_decl(p):
-	'''var_decl : variable EQUALS expression'''
+	'''var_decl : variable EQUALS expr'''
 	p[0] = ast.VarDecl(p[1], p[3])
 
 # Error rule for syntax errors
@@ -101,7 +102,6 @@ def p_error(p):
 		raise EOFError("Unexpected end of file")
 	raise SyntaxError("Syntax error near unexpected token '%s' on line %d" % (p.value, p.lineno))
 
-# Instantiate the parser
 parser = yacc.yacc()
 
 def parse(s: str):
