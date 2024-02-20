@@ -1,1 +1,1 @@
-from src.exception.unsupported_op import unsupported_op
+from src.dtype.exceptions import InvalidShapeError, NotSquareError, unsupported_op

@@ -1,3 +1,11 @@
+class InvalidShapeError(ValueError):
+	def __init__(self):
+		super().__init__("Invalid shape")
+
+class NotSquareError(ValueError):
+	def __init__(self):
+		super().__init__("Matrix is not square")
+
 def unsupported_op(op, *args):
 	"""Returns a TypeError for an unsupported operand.
 

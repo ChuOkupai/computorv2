@@ -1,5 +1,7 @@
 from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, VarDecl, Visitor
+from src.dtype import Matrix
 from src.interpreter.storage import Storage
+
 
 class EvalVisitor(Visitor):
 	"""Evaluates the AST using the given storage."""
@@ -27,7 +29,14 @@ class EvalVisitor(Visitor):
 		self.storage.set_variable(name, value)
 
 	def visit_matdecl(self, matdecl: MatDecl) -> None:
-		raise NotImplementedError('Matrix declarations are not supported yet')
+		values = []
+		for row in matdecl.rows:
+			row_values = []
+			for cell in row:
+				cell.accept(self)
+				row_values.append(self.res)
+			values.append(row_values)
+		self.res = Matrix(values)
 
 	def visit_fundecl(self, fundecl: FunDecl) -> None:
 		raise NotImplementedError('Function declarations are not supported yet')

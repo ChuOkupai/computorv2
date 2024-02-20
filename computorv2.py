@@ -33,4 +33,6 @@ if __name__ == '__main__':
 			print("exec error:", e, file=sys.stderr)
 		except SyntaxError as e:
 			print("syntax error:", e, file=sys.stderr)
+		except Exception as e:
+			print("error:", e, file=sys.stderr)
 		contents = ''
