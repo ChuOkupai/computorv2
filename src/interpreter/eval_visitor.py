@@ -26,6 +26,8 @@ class EvalVisitor(Visitor):
 		name = vardecl.name.name
 		vardecl.value.accept(self)
 		value = self.res
+		if self.storage.is_constant(name):
+			raise NameError(f'Variable {name} is a constant')
 		self.storage.set_variable(name, value)
 
 	def visit_matdecl(self, matdecl: MatDecl) -> None:

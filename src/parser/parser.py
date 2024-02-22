@@ -58,7 +58,7 @@ def p_constant(p):
 
 def p_variable(p):
 	'''variable : ID'''
-	p[0] = ast.Identifier(p[1])
+	p[0] = ast.Identifier(p[1].lower())
 
 def p_matrix(p):
 	'''matrix : LBRACKET matrix_rows RBRACKET'''

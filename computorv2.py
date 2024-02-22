@@ -29,6 +29,8 @@ if __name__ == '__main__':
 			print(EvalVisitor(storage).visit(ast))
 		except EOFError:
 			continue
+		except NameError as e:
+			print("name error:", e, file=sys.stderr)
 		except NotImplementedError as e:
 			print("exec error:", e, file=sys.stderr)
 		except SyntaxError as e:
