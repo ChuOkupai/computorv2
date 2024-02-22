@@ -1,5 +1,5 @@
-from enum import Enum
 from src.ast import Ast
+from src.parser import associativity_dict, precedence_dict
 
 class BinaryOp(Ast):
 	"""Represents a binary operation."""
@@ -9,8 +9,25 @@ class BinaryOp(Ast):
 		self.op = op
 		self.right = right
 
+	def _convert_to_token(self):
+		symbol_to_token = {
+			'+': 'ADD',
+			'-': 'SUB',
+			'*': 'MUL',
+			'/': 'DIV',
+			'%': 'MOD',
+			'^': 'POW'
+		}
+		return symbol_to_token[self.op]
+
 	def accept(self, visitor):
 		return visitor.visit_binaryop(self)
+
+	def get_associativity(self):
+		return associativity_dict[self._convert_to_token()]
+
+	def get_precedence(self):
+		return precedence_dict[self._convert_to_token()]
 
 	def __repr__(self):
 		left = repr(self.left)
@@ -28,8 +45,17 @@ class UnaryOp(Ast):
 		self.op = op
 		self.right = right
 
+	def _convert_to_token(self):
+		return 'UADD' if self.op == '+' else 'USUB'
+
 	def accept(self, visitor):
 		visitor.visit_unaryop(self)
+
+	def get_associativity(self):
+		return associativity_dict[self._convert_to_token()]
+
+	def get_precedence(self):
+		return precedence_dict[self._convert_to_token()]
 
 	def __repr__(self):
 		op = repr(self.op)

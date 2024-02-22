@@ -1,16 +1,15 @@
 from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, VarDecl, Visitor
-from src.parser import precedence_dict
 
 class RenderVisitor(Visitor):
 	"""This visitor that renders the AST using the minimum amount of parentheses possible."""
 
 	def visit(self, root: Ast) -> None:
 		root.accept(self)
-		print('\n', end='')
+		print()
 
-	def _need_parenthesis(self, parent_op, node):
-		if isinstance(node, (BinaryOp, UnaryOp)):
-			return precedence_dict[parent_op][1] > precedence_dict[node.op][1]
+	def _need_parentheses(self, parent, child):
+		if isinstance(child, (BinaryOp, UnaryOp)):
+			return parent.get_precedence() >= child.get_precedence()
 		return False
 
 	def _render_grouped(self, node, need_parenthesis):
@@ -30,10 +29,10 @@ class RenderVisitor(Visitor):
 		print(')', end='')
 
 	def visit_constant(self, constant: Constant) -> None:
-		print(constant.value, end='')
+		print(constant, end='')
 
 	def visit_identifier(self, id: Identifier) -> None:
-		print(id.name, end='')
+		print(id, end='')
 
 	def visit_vardecl(self, vardecl: VarDecl) -> None:
 		vardecl.name.accept(self)
@@ -57,15 +56,17 @@ class RenderVisitor(Visitor):
 		self._render_funcall(funcall.name, funcall.args)
 
 	def visit_binaryop(self, binop: BinaryOp) -> None:
-		left_parenthesis = self._need_parenthesis(binop.op, binop.left)
-		right_parenthesis = self._need_parenthesis(binop.op, binop.right)
-		self._render_grouped(binop.left, left_parenthesis)
+		left_parentheses = self._need_parentheses(binop, binop.left)
+		right_parentheses = self._need_parentheses(binop, binop.right)
+		self._render_grouped(binop.left, left_parentheses)
 		if binop.op != '*' or not (isinstance(binop.left, Constant) \
 			and isinstance(binop.right, Identifier)):
 			print(binop.op, end='')
-		self._render_grouped(binop.right, right_parenthesis)
+		self._render_grouped(binop.right, right_parentheses)
 
 	def visit_unaryop(self, unop: UnaryOp) -> None:
-		operand_parenthesis = self._need_parenthesis(unop.op, unop.right)
-		print(unop.op, end='')
-		self._render_grouped(unop.right, operand_parenthesis)
+		need_parentheses = isinstance(unop.right, (BinaryOp, UnaryOp)) \
+			and unop.get_precedence() > unop.right.get_precedence()
+		if unop.op == '-':
+			print(unop.op, end='')
+		self._render_grouped(unop.right, need_parentheses)
