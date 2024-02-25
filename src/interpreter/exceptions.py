@@ -28,6 +28,5 @@ class UndefinedSymbolError(SyntaxError):
 
 class UnusedArgumentsError(SyntaxError):
 	def __init__(self, id, unused_args):
-		plural = 's' if len(unused_args) > 1 else ''
 		unused_args = ', '.join(unused_args)
-		super().__init__(f"function {id} has unused argument{plural}: {unused_args}.")
+		super().__init__(f"function {id} has argument(s): {unused_args}.")

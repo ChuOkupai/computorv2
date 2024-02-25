@@ -1,4 +1,4 @@
-from src.ast import BinaryOp, FunCall, FunDecl, Identifier, UnaryOp, VarDecl, Visitor
+from src.ast import BinaryOp, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, VarDecl, Visitor
 from src.interpreter import CyclicDependencyError, InvalidNumberOfArgumentsError, \
 	MultipleDeclarationError, RequiredIdentifierError, Storage, UnusedArgumentsError
 
@@ -37,8 +37,8 @@ class FunctionCheckVisitor(Visitor):
 			self.visit(vardecl.value)
 		self.storage.set_variable(vardecl.id.value, None)
 
-	def visit_matdecl(self, _):
-		pass
+	def visit_matdecl(self, matdecl: MatDecl):
+		[[self.visit(cell) for cell in row] for row in matdecl.rows]
 
 	def visit_fundecl(self, fundecl: FunDecl):
 		id = fundecl.id.value
