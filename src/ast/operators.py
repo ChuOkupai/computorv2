@@ -35,9 +35,6 @@ class BinaryOp(Ast):
 		right = repr(self.right)
 		return f"{self.__class__.__name__}({left}, {op}, {right})"
 
-	def __str__(self):
-		return f"({self.left} {self.op} {self.right})"
-
 class UnaryOp(Ast):
 	"""Represents a unary operation."""
 
@@ -61,6 +58,3 @@ class UnaryOp(Ast):
 		op = repr(self.op)
 		right = repr(self.right)
 		return f"{self.__class__.__name__}({op}, {right})"
-
-	def __str__(self):
-		return f"({self.op}{self.right})"

@@ -1,74 +1,82 @@
-from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, VarDecl, Visitor
+from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, \
+	VarDecl, Visitor
 
 class RenderVisitor(Visitor):
 	"""This visitor that renders the AST using the minimum amount of parentheses possible."""
 
-	def visit(self, node: Ast) -> None:
+	def __init__(self):
+		self.res = ''
+
+	def visit(self, node: Ast):
 		node.accept(self)
-		print()
+		return self.res
 
 	def _need_parentheses(self, parent: BinaryOp, child, assoc):
-		if isinstance(child, (BinaryOp, UnaryOp)):
-			return parent.get_precedence() > child.get_precedence() \
-				or (parent.get_precedence() == child.get_precedence()
-				and parent.get_associativity() == assoc)
-		return False
+		return isinstance(child, (BinaryOp, UnaryOp)) \
+			and (parent.get_precedence() > child.get_precedence() \
+			or (parent.get_precedence() == child.get_precedence()
+			and parent.get_associativity() == assoc))
 
 	def _render_grouped(self, node, need_parenthesis):
 		if need_parenthesis:
-			print('(', end='')
+			self.res += '('
 		node.accept(self)
 		if need_parenthesis:
-			print(')', end='')
+			self.res += ')'
 
 	def _render_funcall(self, name, args):
-		print(name, end='')
-		print('(', end='')
+		name.accept(self)
+		self.res += '('
 		for i, arg in enumerate(args):
 			if i > 0:
-				print(', ', end='')
+				self.res += ', '
 			arg.accept(self)
-		print(')', end='')
+		self.res += ')'
 
-	def visit_constant(self, constant: Constant) -> None:
-		print(constant, end='')
+	def visit_constant(self, constant: Constant):
+		self.res += str(constant.value)
 
-	def visit_identifier(self, id: Identifier) -> None:
-		print(id, end='')
+	def visit_identifier(self, id: Identifier):
+		self.res += id.value
 
-	def visit_vardecl(self, vardecl: VarDecl) -> None:
+	def visit_vardecl(self, vardecl: VarDecl):
 		vardecl.id.accept(self)
-		print(' = ', end='')
+		self.res += ' = '
 		vardecl.value.accept(self)
 
-	def visit_matdecl(self, matdecl: MatDecl) -> None:
-		print('[', end='')
+	def visit_matdecl(self, matdecl: MatDecl):
+		self.res += '['
 		for i, row in enumerate(matdecl.rows):
 			if i > 0:
-				print('; ', end='')
-			print(row, end='')
-		print(']', end='')
+				self.res += '; '
+			self.res += '['
+			for j, cell in enumerate(row):
+				if j > 0:
+					self.res += ', '
+				cell.accept(self)
+			self.res += ']'
+		self.res += ']'
 
-	def visit_fundecl(self, fundecl: FunDecl) -> None:
+	def visit_fundecl(self, fundecl: FunDecl):
 		self._render_funcall(fundecl.id, fundecl.args)
-		print(' = ', end='')
+		self.res += ' = '
 		fundecl.body.accept(self)
 
-	def visit_funcall(self, funcall: FunCall) -> None:
+	def visit_funcall(self, funcall: FunCall):
 		self._render_funcall(funcall.id, funcall.args)
 
-	def visit_binaryop(self, binop: BinaryOp) -> None:
+	def visit_binaryop(self, binop: BinaryOp):
 		left_parentheses = self._need_parentheses(binop, binop.left, 'right')
 		right_parentheses = self._need_parentheses(binop, binop.right, 'left')
 		self._render_grouped(binop.left, left_parentheses)
 		if binop.op != '*' or not (isinstance(binop.left, Constant) \
 			and isinstance(binop.right, Identifier)):
-			print(f' {binop.op} ', end='')
+			self.res += ' ' + binop.op + ' '
 		self._render_grouped(binop.right, right_parentheses)
 
-	def visit_unaryop(self, unop: UnaryOp) -> None:
+	def visit_unaryop(self, unop: UnaryOp):
 		need_parentheses = isinstance(unop.right, (BinaryOp, UnaryOp)) \
 			and unop.get_precedence() > unop.right.get_precedence()
 		if unop.op == '-':
-			print(unop.op, end='')
+			self.res += '-'
 		self._render_grouped(unop.right, need_parentheses)

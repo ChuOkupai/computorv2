@@ -1,5 +1,4 @@
-from src.ast import Ast
-from src.ast.terminals import Identifier
+from src.ast import Ast, Identifier
 
 class FunCall(Ast):
 	"""Represents a function call statement."""
@@ -36,9 +35,6 @@ class FunDecl(Ast):
 		body = repr(self.body)
 		return f"{self.__class__.__name__}({id}, {args}, {body})"
 
-	def __str__(self):
-		return f"{self.id}({', '.join(map(str, self.args))}) = {self.body}"
-
 class MatDecl(Ast):
 	"""Represents a matrix declaration statement."""
 
@@ -51,9 +47,6 @@ class MatDecl(Ast):
 	def __repr__(self):
 		rows = repr(self.rows)
 		return f"{self.__class__.__name__}({rows})"
-
-	def __str__(self):
-		return f"[{';'.join(map(str, self.rows))}]"
 
 class VarDecl(Ast):
 	"""Represents a variable declaration statement."""
@@ -69,6 +62,3 @@ class VarDecl(Ast):
 		id = repr(self.id)
 		value = repr(self.value)
 		return f"{self.__class__.__name__}({id}, {value})"
-
-	def __str__(self):
-		return f"{self.id} = {self.value}"

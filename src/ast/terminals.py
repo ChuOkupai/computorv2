@@ -13,9 +13,6 @@ class Constant(Ast):
 		value = repr(self.value)
 		return f"{self.__class__.__name__}({value})"
 
-	def __str__(self):
-		return str(self.value)
-
 class Identifier(Ast):
 	"""Represents a function or variable identifier."""
 
@@ -28,6 +25,3 @@ class Identifier(Ast):
 	def __repr__(self):
 		value = repr(self.value)
 		return f"{self.__class__.__name__}({value})"
-
-	def __str__(self):
-		return self.value

@@ -1,4 +1,5 @@
-from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, VarDecl, Visitor
+from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, \
+	RenderVisitor, UnaryOp, VarDecl, Visitor
 from src.dtype import Matrix
 from src.interpreter import FunctionCheckVisitor, InvalidNumberOfArgumentsError, Storage
 
@@ -35,27 +36,29 @@ class EvalVisitor(Visitor):
 	def _abort_execution(self):
 		self.storage.reset_stack()
 
+	@catch_exception
 	def visit(self, node: Ast):
 		node.accept(self)
 		return self.res
 
-	def visit_constant(self, constant: Constant) -> None:
+	def visit_constant(self, constant: Constant):
 		self.res = constant.value
 
-	def visit_identifier(self, id: Identifier) -> None:
+	def visit_identifier(self, id: Identifier):
 		self.res = self.storage.get_variable(id.value)
 
-	def visit_vardecl(self, vardecl: VarDecl) -> None:
+	def visit_vardecl(self, vardecl: VarDecl):
 		self.storage.set_variable(vardecl.id.value, self.visit(vardecl.value))
 
-	def visit_matdecl(self, matdecl: MatDecl) -> None:
+	def visit_matdecl(self, matdecl: MatDecl):
 		self.res = Matrix([[self.visit(cell) for cell in row] for row in matdecl.rows])
 
-	def visit_fundecl(self, fundecl: FunDecl) -> None:
+	def visit_fundecl(self, fundecl: FunDecl):
 		FunctionCheckVisitor(self.storage).visit(fundecl)
 		self.storage.set_function(fundecl.id.value, fundecl)
+		self.res = RenderVisitor().visit(fundecl)
 
-	def visit_funcall(self, funcall: FunCall) -> None:
+	def visit_funcall(self, funcall: FunCall):
 		id = funcall.id.value
 		func = self.storage.get_function(id)
 		if isinstance(func, FunDecl):
@@ -71,8 +74,8 @@ class EvalVisitor(Visitor):
 		else:
 			self.res = func(*[self.visit(arg) for arg in funcall.args])
 
-	def visit_binaryop(self, binop: BinaryOp) -> None:
+	def visit_binaryop(self, binop: BinaryOp):
 		self.res = self.binary_ops[binop.op](self.visit(binop.left), self.visit(binop.right))
 
-	def visit_unaryop(self, unop: UnaryOp) -> None:
+	def visit_unaryop(self, unop: UnaryOp):
 		self.res = self.unary_ops[unop.op](self.visit(unop.right))

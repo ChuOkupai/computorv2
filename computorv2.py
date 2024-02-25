@@ -21,9 +21,8 @@ if __name__ == '__main__':
 			ast = parse(contents)
 			print('---> AST Dump')
 			print(repr(ast))
-			print(ast)
 			print('---> AST Render')
-			RenderVisitor().visit(ast)
+			print(RenderVisitor().visit(ast))
 			print('---> AST Eval')
 			print(EvalVisitor(storage).visit(ast))
 		except EOFError:
@@ -34,6 +33,6 @@ if __name__ == '__main__':
 			print("Exec error:", e, file=sys.stderr)
 		except SyntaxError as e:
 			print("Syntax error:", e, file=sys.stderr)
-		except TypeError as e:
-			print("Type error:", e, file=sys.stderr)
+		# except TypeError as e:
+		# 	print("Type error:", e, file=sys.stderr)
 		contents = ''

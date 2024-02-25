@@ -21,26 +21,26 @@ class FunctionCheckVisitor(Visitor):
 		self.visited_function_ids.add(id)
 		self.depth += 1
 
-	def visit(self, fundecl: FunDecl) -> None:
+	def visit(self, fundecl: FunDecl):
 		fundecl.accept(self)
 
-	def visit_constant(self, _) -> None:
+	def visit_constant(self, _):
 		pass
 
-	def visit_identifier(self, id: Identifier) -> None:
+	def visit_identifier(self, id: Identifier):
 		self.storage.get_variable(id.value)
 		if self.depth == 1 and id.value in self.unused_variable_ids:
 			self.unused_variable_ids.remove(id.value)
 
-	def visit_vardecl(self, vardecl: VarDecl) -> None:
+	def visit_vardecl(self, vardecl: VarDecl):
 		if vardecl.value:
 			self.visit(vardecl.value)
 		self.storage.set_variable(vardecl.id.value, None)
 
-	def visit_matdecl(self, _) -> None:
+	def visit_matdecl(self, _):
 		pass
 
-	def visit_fundecl(self, fundecl: FunDecl) -> None:
+	def visit_fundecl(self, fundecl: FunDecl):
 		id = fundecl.id.value
 		for arg in fundecl.args:
 			if not isinstance(arg, Identifier):
@@ -56,7 +56,7 @@ class FunctionCheckVisitor(Visitor):
 		if unused_args:
 			raise UnusedArgumentsError(id, unused_args)
 
-	def visit_funcall(self, funcall: FunCall) -> None:
+	def visit_funcall(self, funcall: FunCall):
 		id = funcall.id.value
 		if id in self.visited_function_ids:
 			raise CyclicDependencyError(id)
@@ -69,9 +69,9 @@ class FunctionCheckVisitor(Visitor):
 			self.visit(func.body)
 			self._pop_scope(id)
 
-	def visit_binaryop(self, binop: BinaryOp) -> None:
+	def visit_binaryop(self, binop: BinaryOp):
 		self.visit(binop.left)
 		self.visit(binop.right)
 
-	def visit_unaryop(self, unop: UnaryOp) -> None:
+	def visit_unaryop(self, unop: UnaryOp):
 		self.visit(unop.right)
