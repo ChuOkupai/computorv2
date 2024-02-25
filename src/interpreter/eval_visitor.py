@@ -1,68 +1,78 @@
 from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, VarDecl, Visitor
 from src.dtype import Matrix
-from src.interpreter.storage import Storage
+from src.interpreter import FunctionCheckVisitor, InvalidNumberOfArgumentsError, Storage
 
+def catch_exception(func):
+	def wrapped(self, *args, **kwargs):
+		try:
+			return func(self, *args, **kwargs)
+		except Exception:
+			self._abort_execution()
+			raise
+	return wrapped
 
 class EvalVisitor(Visitor):
 	"""Evaluates the AST using the given storage."""
+
+	binary_ops = {
+		'+': lambda a, b: a + b,
+		'/': lambda a, b: a / b,
+		'%': lambda a, b: a % b,
+		'*': lambda a, b: a * b,
+		'^': lambda a, b: a ** b,
+		'-': lambda a, b: a - b
+	}
+
+	unary_ops = {
+		'-': lambda a: -a,
+		'+': lambda a: a
+	}
 
 	def __init__(self, storage: Storage):
 		self.res = None
 		self.storage = storage
 
-	def visit(self, root: Ast):
-		root.accept(self)
+	def _abort_execution(self):
+		self.storage.reset_stack()
+
+	def visit(self, node: Ast):
+		node.accept(self)
 		return self.res
 
 	def visit_constant(self, constant: Constant) -> None:
 		self.res = constant.value
 
 	def visit_identifier(self, id: Identifier) -> None:
-		self.res = self.storage.get_variable(id.name)
-		if not self.res:
-			raise NameError(f'Variable {id.name} is not defined')
+		self.res = self.storage.get_variable(id.value)
 
 	def visit_vardecl(self, vardecl: VarDecl) -> None:
-		name = vardecl.name.name
-		vardecl.value.accept(self)
-		value = self.res
-		if self.storage.is_constant(name):
-			raise NameError(f'Variable {name} is a constant')
-		self.storage.set_variable(name, value)
+		self.storage.set_variable(vardecl.id.value, self.visit(vardecl.value))
 
 	def visit_matdecl(self, matdecl: MatDecl) -> None:
-		values = []
-		for row in matdecl.rows:
-			row_values = []
-			for cell in row:
-				cell.accept(self)
-				row_values.append(self.res)
-			values.append(row_values)
-		self.res = Matrix(values)
+		self.res = Matrix([[self.visit(cell) for cell in row] for row in matdecl.rows])
 
 	def visit_fundecl(self, fundecl: FunDecl) -> None:
-		raise NotImplementedError('Function declarations are not supported yet')
+		FunctionCheckVisitor(self.storage).visit(fundecl)
+		self.storage.set_function(fundecl.id.value, fundecl)
 
 	def visit_funcall(self, funcall: FunCall) -> None:
-		raise NotImplementedError('Function calls are not supported yet')
+		id = funcall.id.value
+		func = self.storage.get_function(id)
+		if isinstance(func, FunDecl):
+			if len(func.args) != len(funcall.args):
+				raise InvalidNumberOfArgumentsError(id, len(func.args), len(funcall.args))
+			self.storage.push_scope()
+			for name, value in zip(func.args, funcall.args):
+				self.visit(VarDecl(name, value))
+			print(func.args)
+			print(func.body)
+			self.res = self.visit(func.body)
+			self.storage.pop_scope()
+		else:
+			self.res = func(*[self.visit(arg) for arg in funcall.args])
 
 	def visit_binaryop(self, binop: BinaryOp) -> None:
-		do_ops = {
-			'+': lambda a, b: a + b,
-			'/': lambda a, b: a / b,
-			'%': lambda a, b: a % b,
-			'*': lambda a, b: a * b,
-			'^': lambda a, b: a ** b,
-			'-': lambda a, b: a - b
-		}
-		binop.left.accept(self)
-		left = self.res
-		binop.right.accept(self)
-		right = self.res
-		self.res = do_ops[binop.op](left, right)
+		self.res = self.binary_ops[binop.op](self.visit(binop.left), self.visit(binop.right))
 
 	def visit_unaryop(self, unop: UnaryOp) -> None:
-		do_ops = { '-': lambda a: -a, '+': lambda a: a }
-		unop.right.accept(self)
-		right = self.res
-		self.res = do_ops[unop.op](right)
+		self.res = self.unary_ops[unop.op](self.visit(unop.right))

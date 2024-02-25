@@ -3,13 +3,15 @@ from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDe
 class RenderVisitor(Visitor):
 	"""This visitor that renders the AST using the minimum amount of parentheses possible."""
 
-	def visit(self, root: Ast) -> None:
-		root.accept(self)
+	def visit(self, node: Ast) -> None:
+		node.accept(self)
 		print()
 
-	def _need_parentheses(self, parent, child):
+	def _need_parentheses(self, parent: BinaryOp, child, assoc):
 		if isinstance(child, (BinaryOp, UnaryOp)):
-			return parent.get_precedence() >= child.get_precedence()
+			return parent.get_precedence() > child.get_precedence() \
+				or (parent.get_precedence() == child.get_precedence()
+				and parent.get_associativity() == assoc)
 		return False
 
 	def _render_grouped(self, node, need_parenthesis):
@@ -35,7 +37,7 @@ class RenderVisitor(Visitor):
 		print(id, end='')
 
 	def visit_vardecl(self, vardecl: VarDecl) -> None:
-		vardecl.name.accept(self)
+		vardecl.id.accept(self)
 		print(' = ', end='')
 		vardecl.value.accept(self)
 
@@ -48,20 +50,20 @@ class RenderVisitor(Visitor):
 		print(']', end='')
 
 	def visit_fundecl(self, fundecl: FunDecl) -> None:
-		self._render_funcall(fundecl.name, fundecl.args)
+		self._render_funcall(fundecl.id, fundecl.args)
 		print(' = ', end='')
 		fundecl.body.accept(self)
 
 	def visit_funcall(self, funcall: FunCall) -> None:
-		self._render_funcall(funcall.name, funcall.args)
+		self._render_funcall(funcall.id, funcall.args)
 
 	def visit_binaryop(self, binop: BinaryOp) -> None:
-		left_parentheses = self._need_parentheses(binop, binop.left)
-		right_parentheses = self._need_parentheses(binop, binop.right)
+		left_parentheses = self._need_parentheses(binop, binop.left, 'right')
+		right_parentheses = self._need_parentheses(binop, binop.right, 'left')
 		self._render_grouped(binop.left, left_parentheses)
 		if binop.op != '*' or not (isinstance(binop.left, Constant) \
 			and isinstance(binop.right, Identifier)):
-			print(binop.op, end='')
+			print(f' {binop.op} ', end='')
 		self._render_grouped(binop.right, right_parentheses)
 
 	def visit_unaryop(self, unop: UnaryOp) -> None:

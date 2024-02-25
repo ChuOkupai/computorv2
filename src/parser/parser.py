@@ -6,8 +6,8 @@ precedence = (
 	('right', 'EQUALS'),
 	('left', 'ADD', 'SUB'),
 	('left', 'MUL', 'DIV', 'MOD'),
-	('left', 'POW'),
-	('right', 'USUB', 'UADD'),
+	('right', 'POW'),
+	('right', 'UADD', 'USUB'),
 	('left', 'QMARK')
 )
 
@@ -17,7 +17,6 @@ precedence_dict = { token: i for i, e in enumerate(precedence) for token in e[1:
 def p_statement(p):
 	'''statement : expr
 		| fun_decl
-		| 
 		| var_decl'''
 	p[0] = p[1]
 
@@ -28,10 +27,18 @@ def p_expr_group(p):
 def p_expr_terminal(p):
 	'''expr : constant
 		| variable
-		| implicit_mul
 		| matrix
 		| fun_call'''
 	p[0] = p[1]
+
+def p_constant(p):
+	'''constant : FLOAT
+		| INT'''
+	p[0] = ast.Constant(p[1])
+
+def p_expr_implicit_mul(p):
+	'''expr : constant variable %prec MUL'''
+	p[0] = ast.BinaryOp(p[1], '*', p[2])
 
 def p_expr_binary_op(p):
 	'''expr : expr ADD expr
@@ -43,18 +50,9 @@ def p_expr_binary_op(p):
 	p[0] = ast.BinaryOp(p[1], p[2], p[3])
 
 def p_expr_unary_op(p):
-	'''expr : SUB expr %prec USUB
-		| ADD expr %prec UADD'''
+	'''expr : ADD expr %prec UADD
+		| SUB expr %prec USUB'''
 	p[0] = ast.UnaryOp(p[1], p[2])
-
-def p_expr_implicit_mul(p):
-	'''implicit_mul : constant variable %prec MUL'''
-	p[0] = ast.BinaryOp(p[1], '*', p[2])
-
-def p_constant(p):
-	'''constant : FLOAT
-		| INT'''
-	p[0] = ast.Constant(p[1])
 
 def p_variable(p):
 	'''variable : ID'''
@@ -92,7 +90,7 @@ def p_fun_call(p):
 
 def p_fun_decl(p):
 	'''fun_decl : fun_call EQUALS expr'''
-	p[0] = ast.FunDecl(p[1].name, p[1].args, p[3])
+	p[0] = ast.FunDecl(p[1].id, p[1].args, p[3])
 
 def p_var_decl(p):
 	'''var_decl : variable EQUALS expr'''

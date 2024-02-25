@@ -19,15 +19,15 @@ class Constant(Ast):
 class Identifier(Ast):
 	"""Represents a function or variable identifier."""
 
-	def __init__(self, name: str):
-		self.name = name
+	def __init__(self, value: str):
+		self.value = value
 	
 	def accept(self, visitor):
 		visitor.visit_identifier(self)
 	
 	def __repr__(self):
-		name = repr(self.name)
-		return f"{self.__class__.__name__}({name})"
+		value = repr(self.value)
+		return f"{self.__class__.__name__}({value})"
 
 	def __str__(self):
-		return self.name
+		return self.value

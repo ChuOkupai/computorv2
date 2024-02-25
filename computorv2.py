@@ -12,7 +12,6 @@ if __name__ == '__main__':
 			if not line:
 				continue
 		except EOFError:
-			print('Bye...')
 			break
 		contents += line + '\n'
 		try:
@@ -30,9 +29,11 @@ if __name__ == '__main__':
 		except EOFError:
 			continue
 		except NameError as e:
-			print("name error:", e, file=sys.stderr)
+			print("Name error:", e, file=sys.stderr)
 		except NotImplementedError as e:
-			print("exec error:", e, file=sys.stderr)
+			print("Exec error:", e, file=sys.stderr)
 		except SyntaxError as e:
-			print("syntax error:", e, file=sys.stderr)
+			print("Syntax error:", e, file=sys.stderr)
+		except TypeError as e:
+			print("Type error:", e, file=sys.stderr)
 		contents = ''

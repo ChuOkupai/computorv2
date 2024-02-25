@@ -1,6 +1,6 @@
 from copy import copy
 from math import atan2, cos, sin, sqrt
-from src.exception import unsupported_op
+from src.dtype import unsupported_op
 
 class Complex:
 	pass
