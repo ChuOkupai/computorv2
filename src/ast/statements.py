@@ -15,9 +15,6 @@ class FunCall(Ast):
 		args = repr(self.args)
 		return f"{self.__class__.__name__}({id}, {args})"
 
-	def __str__(self):
-		return f"{self.id}({', '.join(map(str, self.args))})"
-
 class FunDecl(Ast):
 	"""Represents a function declaration statement."""
 

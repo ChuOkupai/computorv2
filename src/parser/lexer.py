@@ -1,4 +1,5 @@
 import ply.lex as lex
+from src.dtype import Complex
 
 tokens = [
 	# Simple tokens
@@ -6,6 +7,7 @@ tokens = [
 	'ADD',
 	'DIV',
 	'EQUALS',
+	'MATMUL',
 	'MOD',
 	'MUL',
 	'POW',
@@ -30,6 +32,7 @@ tokens = [
 t_ADD = r'\+'
 t_DIV = r'\/'
 t_EQUALS = r'='
+t_MATMUL = r'\*\*'
 t_MOD = r'%'
 t_MUL = r'\*'
 t_POW = r'\^'
@@ -72,6 +75,10 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
+
+def is_literal(x):
+	"""Returns True if x is a literal, False otherwise."""
+	return isinstance(x, (int, float, Complex))
 
 def reset_lexer():
 	lexer.lineno = 1

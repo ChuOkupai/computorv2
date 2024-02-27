@@ -1,4 +1,4 @@
-import sys
+import sys, traceback
 from src.ast import RenderVisitor
 from src.interpreter import EvalVisitor, Storage
 from src.parser import parse, tokenize
@@ -27,12 +27,6 @@ if __name__ == '__main__':
 			print(EvalVisitor(storage).visit(ast))
 		except EOFError:
 			continue
-		except NameError as e:
-			print("Name error:", e, file=sys.stderr)
-		except NotImplementedError as e:
-			print("Exec error:", e, file=sys.stderr)
-		except SyntaxError as e:
-			print("Syntax error:", e, file=sys.stderr)
-		# except TypeError as e:
-		# 	print("Type error:", e, file=sys.stderr)
+		except Exception as e:
+			traceback.print_exc()
 		contents = ''

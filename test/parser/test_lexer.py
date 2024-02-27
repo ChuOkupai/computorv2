@@ -1,12 +1,13 @@
 import unittest
+from src import ast
 from src.parser import tokenize as tk
 
 class TestLexer(unittest.TestCase):
-	"""This class contains tests for the Complex class."""
+	"""This class contains tests for the Lexer class."""
 
 	def test_operators(self):
-		expected = ['ADD', 'DIV', 'EQUALS', 'MOD', 'MUL', 'POW', 'SUB']
-		tokens = tk('+/=%*^-')
+		expected = ['ADD', 'DIV', 'EQUALS', 'MATMUL', 'MOD', 'MUL', 'POW', 'SUB']
+		tokens = tk('+/=**%*^-')
 		for i, token in enumerate(tokens):
 			self.assertEqual(token.type, expected[i])
 

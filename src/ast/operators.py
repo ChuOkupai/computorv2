@@ -1,5 +1,5 @@
-from src.ast import Ast
 from src.parser import associativity_dict, precedence_dict
+from src.ast import Ast
 
 class BinaryOp(Ast):
 	"""Represents a binary operation."""
@@ -12,11 +12,12 @@ class BinaryOp(Ast):
 	def _convert_to_token(self):
 		symbol_to_token = {
 			'+': 'ADD',
-			'-': 'SUB',
-			'*': 'MUL',
 			'/': 'DIV',
+			'**': 'MATMUL',
 			'%': 'MOD',
-			'^': 'POW'
+			'*': 'MUL',
+			'^': 'POW',
+			'-': 'SUB'
 		}
 		return symbol_to_token[self.op]
 

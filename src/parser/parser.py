@@ -1,14 +1,14 @@
 import ply.yacc as yacc
+from src.parser import reset_lexer, tokens
 from src import ast
-from src.parser.lexer import reset_lexer, tokens
 
 precedence = (
+	('left', 'QMARK'),
 	('right', 'EQUALS'),
 	('left', 'ADD', 'SUB'),
-	('left', 'MUL', 'DIV', 'MOD'),
+	('left', 'MUL', 'MATMUL', 'DIV', 'MOD'),
 	('right', 'POW'),
-	('right', 'UADD', 'USUB'),
-	('left', 'QMARK')
+	('right', 'UADD', 'USUB')
 )
 
 associativity_dict = { token: e[0] for e in precedence for token in e[1:] }
@@ -43,6 +43,7 @@ def p_expr_implicit_mul(p):
 def p_expr_binary_op(p):
 	'''expr : expr ADD expr
 		| expr DIV expr
+		| expr MATMUL expr
 		| expr MOD expr
 		| expr MUL expr
 		| expr POW expr

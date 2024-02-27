@@ -12,12 +12,18 @@ def catch_exception(func):
 			raise
 	return wrapped
 
+def matrix_mul(a, b):
+	if not isinstance(a, Matrix) or not isinstance(b, Matrix):
+		raise TypeError('Matrix multiplication is only defined for matrices.')
+	return a.matmul(b)
+
 class EvalVisitor(Visitor):
 	"""Evaluates the AST using the given storage."""
 
 	binary_ops = {
 		'+': lambda a, b: a + b,
 		'/': lambda a, b: a / b,
+		'**': matrix_mul,
 		'%': lambda a, b: a % b,
 		'*': lambda a, b: a * b,
 		'^': lambda a, b: a ** b,
