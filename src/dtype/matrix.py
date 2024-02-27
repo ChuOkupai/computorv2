@@ -1,11 +1,5 @@
-import math
 from copy import deepcopy
-from src.dtype import Complex, InvalidShapeError, NotSquareError
-
-def is_close(x, y, abs_tol=1e-9):
-	if isinstance(x, Complex):
-		return abs(x - y) < abs_tol
-	return math.isclose(x, y, abs_tol=abs_tol)
+from src.dtype import is_close, is_literal
 
 class Matrix:
 	pass
@@ -13,36 +7,40 @@ class Matrix:
 class Matrix:
 	"""This class represents a matrix."""
 
+	class InvalidShapeError(ValueError):
+		def __init__(self):
+			super().__init__('invalid matrix shape.')
+
+	class NotSquareError(ValueError):
+		def __init__(self):
+			super().__init__('matrix is not square.')
+
 	@staticmethod
 	def identity(n: int, dtype=float):
 		return Matrix([[dtype(i == j) for j in range(n)] for i in range(n)])
 
 	def __init__(self, values: list):
 		if any(len(x) != len(values[0]) for x in values):
-			raise InvalidShapeError
+			raise self.InvalidShapeError
+		if not is_literal(values[0][0]):
+			raise ValueError('all elements in the matrix must be literals.')
 		if any(any(not isinstance(y, type(values[0][0])) for y in x) for x in values):
-			raise SyntaxError("all elements in the matrix must be of the same type.")
+			raise ValueError('all elements in the matrix must be of the same type.')
 		self.shape = (len(values), len(values[0]))
 		self.values = values
 
-	def _assert_same_shape(self, other):
-		if self.shape != other.shape:
-			raise InvalidShapeError
-
-	def _assert_square(self):
-		if not self.is_square():
-			raise NotSquareError
-
-	def _do_op_matrix(self, other, op):
-		self._assert_same_shape(other)
-		return Matrix([[op(x, y) for x, y in zip(r1, r2)] for r1, r2 in zip(self.values, other.values)])
+	def _do_op(self, m, op):
+		if isinstance(m, Matrix):
+			if self.shape != m.shape:
+				raise self.InvalidShapeError
+			return Matrix([[op(x, y) for x, y in zip(r1, r2)] for r1, r2 in zip(self.values, m.values)])
+		return Matrix([[op(x, m) for x in r] for r in self.values])
 
 	def _rref(self):
 		m = self.values
 		for i in range(self.rows()):
 			for j in range(self.cols()):
-				if ((isinstance(m[i][j], (float, int)) and m[i][j] != 0)
-					or (isinstance(m[i][j], Complex) and m[i][j].r != 0)):
+				if m[i][j] != 0:
 					m[i] = [x / m[i][j] for x in m[i]]
 					for k in range(self.rows()):
 						if k != i:
@@ -55,22 +53,11 @@ class Matrix:
 	def rows(self):
 		return self.shape[0]
 
-	def is_close(self, other: Matrix, delta=1e-9):
-		if self.shape != other.shape:
-			return False
-		return all(all(is_close(x, y, abs_tol=delta) for x, y in zip(r1, r2)) for r1, r2 in zip(self.values, other.values))
-
-	def is_square(self):
-		return self.cols() == self.rows()
-
-	def transpose(self):
-		return Matrix([[self.values[j][i] for j in range(self.rows())] for i in range(self.cols())])
-
 	def inverse(self):
-		self._assert_square()
+		if self.cols() != self.rows():
+			raise self.NotSquareError
 		a2 = deepcopy(self)
-		dtype = type(self.values[0][0]) if self.cols() > 0 else float
-		id = Matrix.identity(self.rows(), dtype=dtype)
+		id = Matrix.identity(self.rows(), dtype=type(self.values[0][0]))
 		for i in range(a2.rows()):
 			a2.values[i] += id.values[i]
 		a2.shape = (a2.rows(), 2 * a2.cols())
@@ -78,35 +65,72 @@ class Matrix:
 		for i in range(a2.rows()):
 			a2.values[i] = a2.values[i][a2.cols() // 2:]
 		a2.shape = (a2.rows(), a2.cols() // 2)
-		id2 = self * a2
-		if id2.is_close(id):
+		id2 = self.matmul(a2)
+		if id == id2:
 			return a2
-		raise ValueError("Matrix is not invertible")
+		raise ValueError('matrix is not invertible.')
 
-	def __add__(self, other):
-		if isinstance(other, Matrix):
-			return self._do_op_matrix(other, lambda x, y: x + y)
-		raise NotImplementedError
+	def matmul(self, m):
+		if self.cols() != m.rows():
+			raise self.InvalidShapeError
+		return Matrix([[sum(x * y for x, y in zip(r1, r2)) for r2 in zip(*m.values)] for r1 in self.values])
 
-	def __mul__(self, other):
-		if isinstance(other, (Complex, float, int)):
-			return Matrix([[x * other for x in r] for r in self.values])
-		if isinstance(other, Matrix):
-			if self.cols() != other.rows():
-				raise InvalidShapeError("Number of columns in first matrix must equal number of rows in second matrix")
-			return Matrix([[sum(x * y for x, y in zip(r1, r2)) for r2 in zip(*other.values)] for r1 in self.values])
-		raise NotImplementedError
+	def transpose(self):
+		return Matrix([[self.values[j][i] for j in range(self.rows())] for i in range(self.cols())])
 
-	def __radd__(self, other):
-		return self + other
+	def __add__(self, m):
+		return self._do_op(m, lambda x, y: x + y)
 
-	def __rmul__(self, other):
-		return self * other
+	def __eq__(self, m):
+		if not isinstance(m, Matrix) or self.shape != m.shape:
+			return False
+		return all(all(is_close(x, y) for x, y in zip(r1, r2)) for r1, r2 in zip(self.values, m.values))
 
-	def __sub__(self, other):
-		if isinstance(other, Matrix):
-			return self._do_op_matrix(other, lambda x, y: x - y)
-		raise NotImplementedError
+	def __mod__(self, m):
+		return self._do_op(m, lambda x, y: x % y)
+
+	def __mul__(self, m):
+		return self._do_op(m, lambda x, y: x * y)
+
+	def __ne__(self, m):
+		return not self == m
+
+	def __neg__(self):
+		return Matrix([[-x for x in r] for r in self.values])
+
+	def __pos__(self):
+		return self
+
+	def __pow__(self, m):
+		if self.rows() != self.cols():
+			raise self.InvalidShapeError
+		if not isinstance(m, int):
+			raise TypeError('exponent must be an integer.')
+		if m < 0:
+			raise ValueError('exponent must be non-negative.')
+		if m == 0:
+			return Matrix.identity(self.rows(), dtype=type(self.values[0][0]))
+		if m == 1:
+			return self
+		return self.matmul(self ** (m - 1))
+
+	def __radd__(self, m):
+		return self + m
+
+	def __repr__(self):
+		return f"Matrix({self.values})"
+
+	def __rmul__(self, m):
+		return self * m
+
+	def __rsub__(self, m):
+		return self._do_op(m, lambda x, y: y - x)
 
 	def __str__(self):
-		return str('\n'.join(str(r) for r in self.values))
+		return '\n'.join('[' + ', '.join(str(e) for e in row) + ']' for row in self.values)
+
+	def __sub__(self, other):
+		return self._do_op(other, lambda x, y: x - y)
+
+	def __truediv__(self, other):
+		return self._do_op(other, lambda x, y: x / y)
