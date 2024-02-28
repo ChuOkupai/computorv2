@@ -4,6 +4,11 @@ from src.ast import FunDecl
 from src.dtype import Complex
 from src.interpreter import BuiltInFunctionError, ConstantSymbolError, UndefinedSymbolError
 
+def to_lowercase(func):
+	def wrapper(self, s):
+		return func(self, s.lower())
+	return wrapper
+
 class Storage:
 	"""This class is used to store constants, variables, built-in functions and user-defined functions."""
 
@@ -30,6 +35,7 @@ class Storage:
 		self.functions = {}
 		self.variables = [{}]
 
+	@to_lowercase
 	def get_function(self, name: str):
 		if name in self.builtins:
 			return self.builtins[name]
@@ -37,6 +43,7 @@ class Storage:
 			return self.functions[name]
 		raise UndefinedSymbolError(name)
 
+	@to_lowercase
 	def get_variable(self, name: str):
 		if name in self.constants:
 			return copy(self.constants[name])
@@ -54,11 +61,13 @@ class Storage:
 	def reset_stack(self):
 		self.variables = self.variables[:1]
 
+	@to_lowercase
 	def set_function(self, name: str, fundecl: FunDecl):
 		if name in self.builtins:
 			raise BuiltInFunctionError(name)
 		self.functions[name] = fundecl
 
+	@to_lowercase
 	def set_variable(self, name: str, value):
 		if name in self.constants:
 			raise ConstantSymbolError(name)

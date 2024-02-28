@@ -36,6 +36,10 @@ def p_constant(p):
 		| INT'''
 	p[0] = ast.Constant(p[1])
 
+def p_variable(p):
+	'''variable : ID'''
+	p[0] = ast.Identifier(p[1])
+
 def p_expr_implicit_mul(p):
 	'''expr : constant variable %prec MUL'''
 	p[0] = ast.BinaryOp(p[1], '*', p[2])
@@ -54,10 +58,6 @@ def p_expr_unary_op(p):
 	'''expr : ADD expr %prec UADD
 		| SUB expr %prec USUB'''
 	p[0] = ast.UnaryOp(p[1], p[2])
-
-def p_variable(p):
-	'''variable : ID'''
-	p[0] = ast.Identifier(p[1].lower())
 
 def p_matrix(p):
 	'''matrix : LBRACKET matrix_rows RBRACKET'''
