@@ -3,7 +3,7 @@ from src import ast
 from src.parser import tokenize as tk
 
 class TestLexer(unittest.TestCase):
-	"""This class contains tests for the Lexer class."""
+	"""This class contains tests for the lexer."""
 
 	def test_operators(self):
 		expected = ['ADD', 'DIV', 'EQUALS', 'MATMUL', 'MOD', 'MUL', 'POW', 'SUB']
