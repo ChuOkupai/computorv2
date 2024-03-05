@@ -76,10 +76,6 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
-def is_literal(x):
-	"""Returns True if x is a literal, False otherwise."""
-	return isinstance(x, (int, float, Complex))
-
 def reset_lexer():
 	lexer.lineno = 1
 
