@@ -1,4 +1,4 @@
-from src.ast import BinaryOp, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, VarDecl, Visitor
+from src.ast import Assign, BinaryOp, FunCall, Identifier, MatDecl, UnaryOp, Visitor
 from src.interpreter import CyclicDependencyError, InvalidNumberOfArgumentsError, \
 	MultipleDeclarationError, RequiredIdentifierError, Storage, UnusedArgumentsError
 
@@ -21,7 +21,7 @@ class FunctionCheckVisitor(Visitor):
 		self.visited_function_ids.add(id)
 		self.depth += 1
 
-	def visit(self, fundecl: FunDecl):
+	def visit(self, fundecl):
 		fundecl.accept(self)
 
 	def visit_constant(self, _):

@@ -1,5 +1,9 @@
 # computorv2
 
+## Some improvements over the subject
+
+- Evaluation of the expression can be done without using the `= ?` syntax
+
 ## Bonus
 
 - Support for constants:

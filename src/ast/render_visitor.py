@@ -1,5 +1,5 @@
-from src.ast import Ast, BinaryOp, Constant, FunCall, FunDecl, Identifier, MatDecl, UnaryOp, \
-	VarDecl, Visitor
+from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp, Visitor
 
 class RenderVisitor(Visitor):
 	"""This visitor that renders the AST using the minimum amount of parentheses possible."""
@@ -24,14 +24,19 @@ class RenderVisitor(Visitor):
 		if need_parenthesis:
 			self.res += ')'
 
-	def _render_funcall(self, name, args):
-		name.accept(self)
-		self.res += '('
-		for i, arg in enumerate(args):
-			if i > 0:
-				self.res += ', '
-			arg.accept(self)
-		self.res += ')'
+	def visit_assign(self, assign: Assign):
+		assign.target.accept(self)
+		self.res += ' = '
+		assign.value.accept(self)
+
+	def visit_binaryop(self, binop: BinaryOp):
+		left_parentheses = self._need_parentheses(binop, binop.left, 'right')
+		right_parentheses = self._need_parentheses(binop, binop.right, 'left')
+		self._render_grouped(binop.left, left_parentheses)
+		if binop.op != '*' or not (isinstance(binop.left, Constant) \
+			and isinstance(binop.right, Identifier)):
+			self.res += ' ' + binop.op + ' '
+		self._render_grouped(binop.right, right_parentheses)
 
 	def visit_constant(self, constant: Constant):
 		self.res += str(constant.value)
@@ -39,10 +44,14 @@ class RenderVisitor(Visitor):
 	def visit_identifier(self, id: Identifier):
 		self.res += id.value
 
-	def visit_vardecl(self, vardecl: VarDecl):
-		vardecl.id.accept(self)
-		self.res += ' = '
-		vardecl.value.accept(self)
+	def visit_funcall(self, funcall: FunCall):
+		funcall.id.accept(self)
+		self.res += '('
+		for i, arg in enumerate(funcall.args):
+			if i > 0:
+				self.res += ', '
+			arg.accept(self)
+		self.res += ')'
 
 	def visit_matdecl(self, matdecl: MatDecl):
 		self.res += '['
@@ -57,22 +66,8 @@ class RenderVisitor(Visitor):
 			self.res += ']'
 		self.res += ']'
 
-	def visit_fundecl(self, fundecl: FunDecl):
-		self._render_funcall(fundecl.id, fundecl.args)
-		self.res += ' = '
-		fundecl.body.accept(self)
-
-	def visit_funcall(self, funcall: FunCall):
-		self._render_funcall(funcall.id, funcall.args)
-
-	def visit_binaryop(self, binop: BinaryOp):
-		left_parentheses = self._need_parentheses(binop, binop.left, 'right')
-		right_parentheses = self._need_parentheses(binop, binop.right, 'left')
-		self._render_grouped(binop.left, left_parentheses)
-		if binop.op != '*' or not (isinstance(binop.left, Constant) \
-			and isinstance(binop.right, Identifier)):
-			self.res += ' ' + binop.op + ' '
-		self._render_grouped(binop.right, right_parentheses)
+	def visit_solve(self, solve: Solve):
+		solve.assign.accept(self)
 
 	def visit_unaryop(self, unop: UnaryOp):
 		need_parentheses = isinstance(unop.right, (BinaryOp, UnaryOp)) \

@@ -1,6 +1,6 @@
-import sys, traceback
+import traceback
 from src.ast import RenderVisitor
-from src.interpreter import EvalVisitor, Storage
+from src.interpreter import Storage
 from src.parser import parse, tokenize
 
 if __name__ == '__main__':
@@ -23,8 +23,6 @@ if __name__ == '__main__':
 			print(repr(ast))
 			print('---> AST Render')
 			print(RenderVisitor().visit(ast))
-			print('---> AST Eval')
-			print(EvalVisitor(storage).visit(ast))
 		except EOFError:
 			continue
 		except Exception as e:
