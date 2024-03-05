@@ -68,6 +68,7 @@ class RenderVisitor(Visitor):
 
 	def visit_solve(self, solve: Solve):
 		solve.assign.accept(self)
+		self.res += ' ?'
 
 	def visit_unaryop(self, unop: UnaryOp):
 		need_parentheses = isinstance(unop.right, (BinaryOp, UnaryOp)) \

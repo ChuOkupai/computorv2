@@ -76,9 +76,6 @@ class UnaryOp(Ast):
 	def evaluate(self, right):
 		return self.unary_ops[self.op](right)
 
-	def get_associativity(self):
-		return associativity_dict[self._convert_to_token()]
-
 	def get_precedence(self):
 		return precedence_dict[self._convert_to_token()]
 

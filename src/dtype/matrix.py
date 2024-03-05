@@ -103,7 +103,7 @@ class Matrix:
 
 	def __pow__(self, m):
 		if self.rows() != self.cols():
-			raise self.InvalidShapeError
+			raise self.NotSquareError
 		if not isinstance(m, int):
 			raise TypeError('exponent must be an integer.')
 		if m < 0:

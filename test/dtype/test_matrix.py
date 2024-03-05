@@ -26,6 +26,10 @@ class TestMatrix(unittest.TestCase):
 		with self.assertRaises(ValueError):
 			Matrix([[1, 2], [3, 4.5]])
 
+	def test_init_invalid_literal(self):
+		with self.assertRaises(ValueError):
+			Matrix([['x', 2], [3, 4]])
+
 	def test_inverse(self):
 		u = Matrix.identity(3)
 		v = u.inverse()
@@ -146,6 +150,11 @@ class TestMatrix(unittest.TestCase):
 		self.assertEqual(Matrix([[Complex(1, 2), Complex(3, 4)], [Complex(5, 6), Complex(7, 8)]]) ** 0, Matrix.identity(2, dtype=Complex))
 		self.assertEqual(m ** 1, m)
 		self.assertEqual(m ** 2, m.matmul(m))
+
+	def test_pow_invalid_shape(self):
+		m = Matrix([[1., 2.], [3., 4.], [5., 6.]])
+		with self.assertRaises(ValueError):
+			m ** 2
 
 	def test_pow_invalid_exponent(self):
 		m = Matrix([[1., 2.], [3., 4.]])

@@ -44,6 +44,14 @@ class TestParser(unittest.TestCase):
 		self.assertEqual(repr(parse('funA(2) = ?')),
 			"FunCall(Identifier('funA'), [Constant(2)])")
 
+	def test_priority(self):
+		self.assertEqual(repr(parse('1 * 2 + 3')),
+			"BinaryOp(BinaryOp(Constant(1), '*', Constant(2)), '+', Constant(3))")
+		self.assertEqual(repr(parse('1 + 2 * 3')),
+			"BinaryOp(Constant(1), '+', BinaryOp(Constant(2), '*', Constant(3)))")
+		self.assertEqual(repr(parse('(1 + 2) * 3')),
+			"BinaryOp(BinaryOp(Constant(1), '+', Constant(2)), '*', Constant(3))")
+
 	def test_compute_eof(self):
 		with self.assertRaises(EOFError):
 			parse('a + 2 =')
