@@ -1,8 +1,24 @@
 from src.parser import associativity_dict, precedence_dict
 from src.ast import Ast
+from src.dtype import Matrix
+
+def matrix_mul(a, b):
+	if not isinstance(a, Matrix) or not isinstance(b, Matrix):
+		raise TypeError('Matrix multiplication is only defined for matrices.')
+	return a.matmul(b)
 
 class BinaryOp(Ast):
 	"""Represents a binary operation."""
+
+	binary_ops = {
+		'+': lambda a, b: a + b,
+		'/': lambda a, b: a / b,
+		'**': matrix_mul,
+		'%': lambda a, b: a % b,
+		'*': lambda a, b: a * b,
+		'^': lambda a, b: a ** b,
+		'-': lambda a, b: a - b
+	}
 
 	def __init__(self, left: Ast, op: str, right: Ast):
 		self.left = left
@@ -24,6 +40,9 @@ class BinaryOp(Ast):
 	def accept(self, visitor):
 		return visitor.visit_binaryop(self)
 
+	def evaluate(self, left, right):
+		return self.binary_ops[self.op](left, right)
+
 	def get_associativity(self):
 		return associativity_dict[self._convert_to_token()]
 
@@ -39,6 +58,11 @@ class BinaryOp(Ast):
 class UnaryOp(Ast):
 	"""Represents a unary operation."""
 
+	unary_ops = {
+		'-': lambda a: -a,
+		'+': lambda a: a
+	}
+
 	def __init__(self, op: str, right: Ast):
 		self.op = op
 		self.right = right
@@ -48,6 +72,9 @@ class UnaryOp(Ast):
 
 	def accept(self, visitor):
 		visitor.visit_unaryop(self)
+
+	def evaluate(self, right):
+		return self.unary_ops[self.op](right)
 
 	def get_associativity(self):
 		return associativity_dict[self._convert_to_token()]
