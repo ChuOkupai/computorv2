@@ -1,7 +1,8 @@
 import math
 from copy import copy
 from src.dtype import Complex
-from src.interpreter import BuiltInFunctionError, ConstantSymbolError, UndefinedSymbolError
+from src.interpreter import ConstantSymbolError, BuiltInFunctionError, FunctionStorage, \
+	UndefinedSymbolError
 
 class Storage:
 	"""This class is used to store constants, variables, built-in functions and user-defined functions."""
@@ -53,10 +54,10 @@ class Storage:
 	def reset_stack(self):
 		self.variables = self.variables[:1]
 
-	def set_function(self, name: str, fundecl):
+	def set_function(self, name: str, function_storage: FunctionStorage):
 		if name in self.builtins:
 			raise BuiltInFunctionError(name)
-		self.functions[name] = fundecl
+		self.functions[name] = function_storage
 
 	def set_variable(self, name: str, value):
 		if name in self.constants:
