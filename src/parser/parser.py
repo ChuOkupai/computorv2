@@ -38,7 +38,7 @@ def p_constant(p):
 
 def p_identifier(p):
 	'''identifier : ID'''
-	p[0] = ast.Identifier(p[1])
+	p[0] = ast.Identifier(p[1].lower())
 
 def p_expr_binary_op(p):
 	'''expr : expr ADD expr
