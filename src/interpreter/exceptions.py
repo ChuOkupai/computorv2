@@ -1,32 +1,46 @@
-class BuiltInFunctionError(SyntaxError):
-	def __init__(self, id):
-		super().__init__(f"function {id} is a built-in function.")
+from src.ast import Identifier
 
-class ConstantSymbolError(SyntaxError):
-	def __init__(self, id):
-		super().__init__(f"symbol {id} is a constant.")
+class InterpreterError(RuntimeError):
+	"""Base class for exceptions in the interpreter."""
 
-class CyclicDependencyError(SyntaxError):
-	def __init__(self, id):
-		super().__init__(f"found cyclic function call to {id}.")
+	def __init__(self, scope_id: str, message: str):
+		super().__init__(f"function {scope_id}: {message}." if scope_id else f'{message}.')
 
-class InvalidNumberOfArgumentsError(SyntaxError):
-	def __init__(self, id, expected, actual):
-		super().__init__(f"function {id} expects {expected} arguments, got {actual}.")
+class InterpreterErrorGroup(Exception):
+	"""Collection of errors during execution."""
 
-class MultipleDeclarationError(SyntaxError):
-	def __init__(self, id, arg):
-		super().__init__(f"function {id} has multiple declarations of argument {arg}.")
+	def __init__(self, errors: list):
+		self.errors = errors
 
-class RequiredIdentifierError(SyntaxError):
-	def __init__(self, id, arg):
-		super().__init__(f"function {id} expects an identifier as an argument, got {arg}.")
+class CyclicDependencyError(InterpreterError):
+	def __init__(self, scope_id: str):
+		super().__init__(scope_id, "call results in an infinite loop")
 
-class UndefinedSymbolError(SyntaxError):
-	def __init__(self, id):
-		super().__init__(f"symbol {id} is not defined.")
+class InvalidArgumentsLengthError(InterpreterError):
+	def __init__(self, scope_id: str, expected: int, got: int):
+		plural = 's' if expected > 1 else ''
+		super().__init__(scope_id, f"expected {expected} argument{plural}, got {got}")
 
-class UnusedArgumentsError(SyntaxError):
-	def __init__(self, id, unused_args):
-		unused_args = ', '.join(unused_args)
-		super().__init__(f"function {id} has argument(s): {unused_args}.")
+class MultipleDeclarationError(InterpreterError):
+	def __init__(self, scope_id: str, arg: Identifier):
+		super().__init__(scope_id, f"multiple declarations of parameter {arg.value}")
+
+class RequireIdentifierError(InterpreterError):
+	def __init__(self, scope_id: str, index: int):
+		super().__init__(scope_id, f"expects an identifier for parameter {index + 1}")
+
+class UnusedParameterError(InterpreterError):
+	def __init__(self, scope_id: str, param: str):
+		super().__init__(scope_id, f"unused parameter {param}")
+
+class BuiltInConstantError(InterpreterError):
+	def __init__(self, scope_id: str, id: str):
+		super().__init__(scope_id, f"{id} is a built-in constant")
+
+class BuiltInFunctionError(InterpreterError):
+	def __init__(self, scope_id: str, id: str):
+		super().__init__(scope_id, f"{id} is a built-in function")
+
+class UndefinedSymbolError(InterpreterError):
+	def __init__(self, scope_id: str, id: str):
+		super().__init__(scope_id, f"{id} is not defined")

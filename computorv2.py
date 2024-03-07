@@ -1,10 +1,10 @@
 import traceback
 from src.ast import RenderVisitor
-from src.interpreter import EvalVisitor, Storage
+from src.interpreter import EvaluatorVisitor, Context
 from src.parser import parse, tokenize
 
 if __name__ == '__main__':
-	storage = Storage()
+	storage = Context()
 	contents = ''
 	while True:
 		try:
@@ -24,9 +24,12 @@ if __name__ == '__main__':
 			print('---> AST Render')
 			print(RenderVisitor().visit(ast))
 			print('---> AST Evaluate')
-			print(EvalVisitor(storage).visit(ast))
+			print(EvaluatorVisitor(storage).visit(ast))
 		except EOFError:
 			continue
 		except Exception as e:
 			traceback.print_exc()
+			if isinstance(e.args[0],list):
+				for i in e.args[0]:
+					print(i)
 		contents = ''

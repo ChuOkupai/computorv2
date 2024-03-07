@@ -1,11 +1,12 @@
 import math, unittest
-from src.interpreter import BuiltInFunctionError, ConstantSymbolError, Storage, UndefinedSymbolError
+from src.interpreter import BuiltInConstantError, BuiltInFunctionError, Context, \
+	UndefinedSymbolError
 
-class TestStorage(unittest.TestCase):
-	'''This class contains tests for the Storage class.'''
+class TestContext(unittest.TestCase):
+	'''This class contains tests for the Context class.'''
 
 	def setUp(self):
-		self.s = Storage()
+		self.s = Context()
 
 	def test_get_function(self):
 		self.assertEqual(self.s.get_function('abs'), abs)
@@ -34,7 +35,7 @@ class TestStorage(unittest.TestCase):
 		self.assertEqual(self.s.get_variable('y'), 42)
 
 	def test_set_variable_constant(self):
-		with self.assertRaises(ConstantSymbolError):
+		with self.assertRaises(BuiltInConstantError):
 			self.s.set_variable('e', 42)
 
 	def test_get_user_defined_function(self):
