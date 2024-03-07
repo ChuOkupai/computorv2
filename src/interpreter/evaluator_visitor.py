@@ -9,16 +9,16 @@ def catch_exception(func):
 		try:
 			return func(self, *args, **kwargs)
 		except Exception:
-			self.storage.reset_stack()
+			self.context.reset_stack()
 			raise
 	return wrapped
 
 class EvaluatorVisitor(Visitor):
-	"""Evaluates the AST using the given storage."""
+	"""Evaluates the AST using the given context."""
 
-	def __init__(self, storage: Context):
+	def __init__(self, context: Context):
 		self.res = None
-		self.storage = storage
+		self.context = context
 
 	@catch_exception
 	def visit(self, node: Ast):
@@ -28,11 +28,11 @@ class EvaluatorVisitor(Visitor):
 	def visit_assign(self, assign: Assign):
 		target = assign.target
 		if isinstance(target, Identifier):
-			self.storage.set_variable(target.value, self.visit(assign.value))
+			self.context.set_variable(target.value, self.visit(assign.value))
 		elif isinstance(target, FunCall):
-			FunctionCheckVisitor(self.storage).visit(assign)
-			function_storage = FunctionStorage(target.args, assign.value)
-			self.storage.set_function(target.id.value, function_storage)
+			FunctionCheckVisitor(self.context).visit(assign)
+			function_context = FunctionStorage(target.args, assign.value)
+			self.context.set_function(target.id.value, function_context)
 			self.res = RenderVisitor().visit(assign)
 		else:
 			raise ValueError('cannot assign an expression to another expression.')
@@ -45,20 +45,20 @@ class EvaluatorVisitor(Visitor):
 
 	def visit_funcall(self, funcall: FunCall):
 		id = funcall.id.value
-		f = self.storage.get_function(id)
+		f = self.context.get_function(id)
 		if isinstance(f, FunctionStorage):
 			if len(f.args) != len(funcall.args):
 				raise InvalidArgumentsLengthError(id, len(f.args), len(funcall.args))
-			self.storage.push_scope()
+			self.context.push_scope()
 			for name, value in zip(f.args, funcall.args):
 				self.visit(Assign(name, value))
 			self.res = self.visit(f.body)
-			self.storage.pop_scope()
+			self.context.pop_scope()
 		else:
 			self.res = f(*[self.visit(arg) for arg in funcall.args])
 
 	def visit_identifier(self, id: Identifier):
-		self.res = self.storage.get_variable(id.value)
+		self.res = self.context.get_variable(id.value)
 
 	def visit_matdecl(self, matdecl: MatDecl):
 		self.res = Matrix([[self.visit(cell) for cell in row] for row in matdecl.rows])

@@ -4,7 +4,7 @@ from src.dtype import Matrix
 
 def matrix_mul(a, b):
 	if not isinstance(a, Matrix) or not isinstance(b, Matrix):
-		raise TypeError('Matrix multiplication is only defined for matrices.')
+		raise TypeError('matrix multiplication is only defined for matrices.')
 	return a.matmul(b)
 
 class BinaryOp(Ast):
