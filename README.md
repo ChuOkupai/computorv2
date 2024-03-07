@@ -8,7 +8,6 @@
 
 - Support for constants:
 	- `e`
-	- `inf`
 	- `nan`
 	- `pi`
 	- `tau`

@@ -22,7 +22,6 @@ class Context:
 		'e': math.e,
 		'i': Complex(0, 1),
 		'inf': math.inf,
-		'nan': math.nan,
 		'pi': math.pi,
 		'tau': math.tau
 	}
