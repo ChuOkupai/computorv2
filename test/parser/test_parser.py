@@ -1,5 +1,4 @@
 import unittest
-from src import *
 from src.parser import parse
 
 class TestParser(unittest.TestCase):

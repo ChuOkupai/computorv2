@@ -1,8 +1,7 @@
 import math
-from copy import copy
 from src.dtype import Complex
 from src.interpreter import BuiltInConstantError, BuiltInFunctionError, FunctionStorage, \
-	UndefinedSymbolError
+	InterpreterErrorGroup, UndefinedFunctionError, UndefinedVariableError
 
 class Context:
 	"""This class is used to store constants, variables, built-in functions and user-defined
@@ -30,30 +29,43 @@ class Context:
 		self.functions = {}
 		self.variables = [{}]
 		self.call_stack = [None]
+		self.errors = []
 
 	def get_function(self, name: str):
 		if name in self.builtins:
 			return self.builtins[name]
 		if name in self.functions:
 			return self.functions[name]
-		raise UndefinedSymbolError(self.call_stack[-1], name)
+		self.push_error(UndefinedFunctionError, name)
+		return None
 
 	def get_variable(self, name: str):
 		if name in self.constants:
-			return copy(self.constants[name])
+			return self.constants[name]
 		for scope in reversed(self.variables):
 			if name in scope:
-				return copy(scope[name])
-		raise UndefinedSymbolError(self.call_stack[-1], name)
+				return scope[name]
+		self.push_error(UndefinedVariableError, name)
+		return None
 
 	def pop_call(self):
 		self.call_stack.pop()
+
+	def pop_errors(self):
+		self.reset_stack()
+		if self.errors:
+			errors = self.errors
+			self.errors = []
+			raise InterpreterErrorGroup(errors)
 
 	def pop_scope(self):
 		self.variables.pop()
 
 	def push_call(self, id: str):
 		self.call_stack.append(id)
+
+	def push_error(self, error_type: type, *args):
+		self.errors.append(error_type(self.call_stack[-1], *args))
 
 	def push_scope(self):
 		self.variables.append({})
@@ -64,10 +76,12 @@ class Context:
 
 	def set_function(self, name: str, function_storage: FunctionStorage):
 		if name in self.builtins:
-			raise BuiltInFunctionError(self.call_stack[-1], name)
-		self.functions[name] = function_storage
+			self.push_error(BuiltInFunctionError, name)
+		else:
+			self.functions[name] = function_storage
 
 	def set_variable(self, name: str, value):
 		if name in self.constants:
-			raise BuiltInConstantError(self.call_stack[-1], name)
-		self.variables[-1][name] = value
+			self.push_error(BuiltInConstantError, name)
+		else:
+			self.variables[-1][name] = value

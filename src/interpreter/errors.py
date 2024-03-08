@@ -41,6 +41,10 @@ class BuiltInFunctionError(InterpreterError):
 	def __init__(self, scope_id: str, id: str):
 		super().__init__(scope_id, f"{id} is a built-in function")
 
-class UndefinedSymbolError(InterpreterError):
+class UndefinedFunctionError(InterpreterError):
 	def __init__(self, scope_id: str, id: str):
-		super().__init__(scope_id, f"{id} is not defined")
+		super().__init__(scope_id, f"function {id} is not defined")
+
+class UndefinedVariableError(InterpreterError):
+	def __init__(self, scope_id: str, id: str):
+		super().__init__(scope_id, f"variable {id} is not defined")

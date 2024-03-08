@@ -37,8 +37,11 @@ class EvaluatorVisitor(Visitor):
 		else:
 			raise ValueError('cannot assign an expression to another expression.')
 
-	def visit_binaryop(self, binop: BinaryOp):
-		self.res = binop.evaluate(self.visit(binop.left), self.visit(binop.right))
+	def visit_binaryop(self, bop: BinaryOp):
+		bop.left = self.visit(bop.left)
+		bop.right = self.visit(bop.right)
+		if isinstance(bop.left, Constant) and isinstance(bop.right, Constant):
+			self.res = Constant(bop.evaluate(bop.left.value, bop.right.value))
 
 	def visit_constant(self, constant: Constant):
 		self.res = constant.value

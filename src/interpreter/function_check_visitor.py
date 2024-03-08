@@ -11,21 +11,25 @@ class FunctionCheckVisitor(Visitor):
 		self.visited_functions = set()
 		self.unused_variables = set()
 		self.depth = 0
-		self.errors = []
 
-	def _check_signature(self, id: str, args: list):
+	def _check_signature(self, args: list):
 		func_args = []
 		duplicates = set()
 		for i, arg in enumerate(args):
 			if not isinstance(arg, Identifier):
-				self.errors.append(RequireIdentifierError(id, i))
+				self.context.push_error(RequireIdentifierError, i)
 			elif arg.value not in self.unused_variables:
 				func_args.append(arg)
 				self.unused_variables.add(arg.value)
 			elif arg.value not in duplicates:
-				self.errors.append(MultipleDeclarationError(id, arg))
+				self.context.push_error(MultipleDeclarationError, arg)
 				duplicates.add(arg.value)
 		return func_args
+
+	def _push_error(self, id: str, error_type: type, *args):
+		self.context.push_call(id)
+		self.context.push_error(error_type, *args)
+		self.context.pop_call()
 
 	def _visit_function(self, id: str, fs: FunctionStorage, args: list):
 		self.context.push_scope()
@@ -49,19 +53,17 @@ class FunctionCheckVisitor(Visitor):
 	def visit_assign(self, assign: Assign):
 		target = assign.target
 		if isinstance(target, Identifier):
-			try:
-				self.context.set_variable(target.value, self.visit(assign.value))
-			except Exception as e:
-				self.errors.append(e)
+			self.context.set_variable(target.value, self.visit(assign.value))
 		elif isinstance(target, FunCall):
 			id = target.id.value
-			func_args = self._check_signature(id, target.args)
+			self.context.push_call(id)
+			func_args = self._check_signature(target.args)
 			fs = FunctionStorage(func_args, assign.value)
 			self._visit_function(id, fs, [Constant(None)] * len(func_args))
 			unused_args = [arg.value for arg in func_args if arg.value in self.unused_variables]
-			self.errors += [UnusedParameterError(id, arg) for arg in unused_args]
-			if len(self.errors):
-				raise InterpreterErrorGroup(self.errors)
+			for arg in unused_args:
+				self.context.push_error(UnusedParameterError, arg)
+			self.context.pop_errors()
 
 	def visit_binaryop(self, binop: BinaryOp):
 		self.visit(binop.left)
@@ -74,26 +76,20 @@ class FunctionCheckVisitor(Visitor):
 		id = funcall.id.value
 		f = None
 		if id in self.visited_functions:
-			self.errors.append(CyclicDependencyError(id))
+			self._push_error(id, CyclicDependencyError)
 		else:
-			try:
-				f = self.context.get_function(id)
-			except Exception as e:
-				self.errors.append(e)
+			f = self.context.get_function(id)
 		if isinstance(f, FunctionStorage):
 			if len(f.args) != len(funcall.args):
-				self.errors.append(InvalidArgumentsLengthError(id, len(f.args), len(funcall.args)))
+				self._push_error(id, InvalidArgumentsLengthError, len(f.args), len(funcall.args))
 			self._visit_function(id, f, funcall.args)
 		else:
 			if f and len(funcall.args) > 1:
-				self.errors.append(InvalidArgumentsLengthError(id, 1, len(funcall.args)))
+				self._push_error(id, InvalidArgumentsLengthError, 1, len(funcall.args))
 			[self.visit(arg) for arg in funcall.args]
 
 	def visit_identifier(self, id: Identifier):
-		try:
-			self.context.get_variable(id.value)
-		except Exception as e:
-			self.errors.append(e)
+		self.context.get_variable(id.value)
 		if self.depth < 2 and id.value in self.unused_variables:
 			self.unused_variables.remove(id.value)
 
