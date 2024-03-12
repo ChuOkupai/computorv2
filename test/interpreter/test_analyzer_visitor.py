@@ -1,9 +1,9 @@
 import unittest
 from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
 from src.interpreter.errors import *
-from src.interpreter import Context, FunctionStorage, FunctionCheckVisitor as Fcv
+from src.interpreter import Context, FunctionStorage, AnalyzerVisitor as Fcv
 
-class TestFunctionCheckVisitor(unittest.TestCase):
+class TestAnalyzerVisitor(unittest.TestCase):
 	"""This class checks if all exceptions are raised correctly."""
 
 	def _assert_errors_raised(self, expected_error_types: list[type]):
@@ -19,10 +19,20 @@ class TestFunctionCheckVisitor(unittest.TestCase):
 		self.ctx = Context()
 		self.ast = Assign(None, None)
 
+	def test_assign_expr_error(self):
+		self.ast.target = BinaryOp(Identifier('x'), '+', Identifier('y'))
+		self.ast.value = Identifier('x')
+		self._assert_errors_raised([AssignExpressionError])
+
 	def test_built_in_constant_error(self):
 		self.ast.target = FunCall(Identifier('f'), [Identifier('x'), Identifier('pi')])
 		self.ast.value = BinaryOp(Identifier('x'), '*', Identifier('pi'))
 		self._assert_errors_raised([BuiltInConstantError])
+
+	def test_built_in_function_error(self):
+		self.ast.target = FunCall(Identifier('cos'), [Identifier('x')])
+		self.ast.value = Identifier('x')
+		self._assert_errors_raised([BuiltInFunctionError])
 
 	def test_call_too_few_arguments(self):
 		self.ctx.set_function('f', FunctionStorage([Identifier('x'), Identifier('y')], Identifier('x')))
@@ -48,8 +58,6 @@ class TestFunctionCheckVisitor(unittest.TestCase):
 
 	def test_cyclic_dependency_error(self):
 		self.ast.target = FunCall(Identifier('f'), [Identifier('x')])
-		self.ast.value = Identifier('x')
-		Fcv(self.ctx).visit(self.ast)
 		self.ast.value = FunCall(Identifier('f'), [Identifier('x')])
 		self._assert_errors_raised([CyclicDependencyError])
 
@@ -85,3 +93,9 @@ class TestFunctionCheckVisitor(unittest.TestCase):
 		self.ast.target = FunCall(Identifier('f'), [Identifier('x'), Identifier('y')])
 		self.ast.value = Identifier('x')
 		self._assert_errors_raised([UnusedParameterError])
+
+	def test_multiple_errors(self):
+		self.ast.target = FunCall(Identifier('f'), [Identifier('x'), Identifier('y'), Constant(42), Identifier('y')])
+		self.ast.value = FunCall(Identifier('g'), [BinaryOp(Identifier('x'), '+', Identifier('z'))])
+		self._assert_errors_raised([RequireIdentifierError, MultipleDeclarationError,
+			UndefinedFunctionError, UndefinedVariableError, UnusedParameterError])

@@ -1,7 +1,6 @@
 import math
 from src.dtype import Complex
-from src.interpreter import BuiltInConstantError, BuiltInFunctionError, FunctionStorage, \
-	InterpreterErrorGroup, UndefinedFunctionError, UndefinedVariableError
+from src.interpreter import FunctionStorage, Scope
 
 class Context:
 	"""This class is used to store constants, variables, built-in functions and user-defined
@@ -27,61 +26,48 @@ class Context:
 
 	def __init__(self):
 		self.functions = {}
-		self.variables = [{}]
-		self.call_stack = [None]
-		self.errors = []
+		self.scopes = [Scope(None, {})]
 
-	def get_function(self, name: str):
-		if name in self.builtins:
-			return self.builtins[name]
-		if name in self.functions:
-			return self.functions[name]
-		self.push_error(UndefinedFunctionError, name)
+	def get_depth(self):
+		return len(self.scopes) - 1
+
+	def get_function(self, id: str):
+		if id in self.functions:
+			return self.functions[id]
+		if self.is_builtin(id):
+			return self.builtins[id]
 		return None
 
-	def get_variable(self, name: str):
-		if name in self.constants:
-			return self.constants[name]
-		for scope in reversed(self.variables):
-			if name in scope:
-				return scope[name]
-		self.push_error(UndefinedVariableError, name)
+	def get_scope(self):
+		return self.scopes[-1].id
+
+	def get_variable(self, id: str):
+		for s in reversed(self.scopes):
+			if id in s.variables:
+				return s.variables[id]
+		if self.is_constant(id):
+			return self.constants[id]
 		return None
 
-	def pop_call(self):
-		self.call_stack.pop()
+	def is_builtin(self, id: str):
+		return id in self.builtins
 
-	def pop_errors(self):
-		self.reset_stack()
-		if self.errors:
-			errors = self.errors
-			self.errors = []
-			raise InterpreterErrorGroup(errors)
+	def is_constant(self, id: str):
+		return id in self.constants
 
 	def pop_scope(self):
-		self.variables.pop()
+		if len(self.scopes) == 1:
+			raise IndexError('cannot pop the global scope.')
+		self.scopes.pop()
 
-	def push_call(self, id: str):
-		self.call_stack.append(id)
-
-	def push_error(self, error_type: type, *args):
-		self.errors.append(error_type(self.call_stack[-1], *args))
-
-	def push_scope(self):
-		self.variables.append({})
+	def push_scope(self, id: str):
+		self.scopes.append(Scope(id, {}))
 
 	def reset_stack(self):
-		self.variables = self.variables[:1]
-		self.call_stack = [None]
+		self.scopes = self.scopes[:1]
 
-	def set_function(self, name: str, function_storage: FunctionStorage):
-		if name in self.builtins:
-			self.push_error(BuiltInFunctionError, name)
-		else:
-			self.functions[name] = function_storage
+	def set_function(self, id: str, content: FunctionStorage):
+		self.functions[id] = content
 
-	def set_variable(self, name: str, value):
-		if name in self.constants:
-			self.push_error(BuiltInConstantError, name)
-		else:
-			self.variables[-1][name] = value
+	def set_variable(self, id: str, value):
+		self.scopes[-1].variables[id] = value

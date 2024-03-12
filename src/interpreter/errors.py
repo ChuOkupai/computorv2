@@ -12,6 +12,18 @@ class InterpreterErrorGroup(Exception):
 	def __init__(self, errors: list):
 		self.errors = errors
 
+class AssignExpressionError(InterpreterError):
+	def __init__(self, scope_id: str):
+		super().__init__(scope_id, "cannot assign to an expression")
+
+class BuiltInConstantError(InterpreterError):
+	def __init__(self, scope_id: str, id: str):
+		super().__init__(scope_id, f"{id} is a built-in constant")
+
+class BuiltInFunctionError(InterpreterError):
+	def __init__(self, scope_id: str, id: str):
+		super().__init__(scope_id, f"{id} is a built-in function")
+
 class CyclicDependencyError(InterpreterError):
 	def __init__(self, scope_id: str):
 		super().__init__(scope_id, "call results in an infinite loop")
@@ -29,18 +41,6 @@ class RequireIdentifierError(InterpreterError):
 	def __init__(self, scope_id: str, index: int):
 		super().__init__(scope_id, f"expects an identifier for parameter {index + 1}")
 
-class UnusedParameterError(InterpreterError):
-	def __init__(self, scope_id: str, param: str):
-		super().__init__(scope_id, f"unused parameter {param}")
-
-class BuiltInConstantError(InterpreterError):
-	def __init__(self, scope_id: str, id: str):
-		super().__init__(scope_id, f"{id} is a built-in constant")
-
-class BuiltInFunctionError(InterpreterError):
-	def __init__(self, scope_id: str, id: str):
-		super().__init__(scope_id, f"{id} is a built-in function")
-
 class UndefinedFunctionError(InterpreterError):
 	def __init__(self, scope_id: str, id: str):
 		super().__init__(scope_id, f"function {id} is not defined")
@@ -48,3 +48,7 @@ class UndefinedFunctionError(InterpreterError):
 class UndefinedVariableError(InterpreterError):
 	def __init__(self, scope_id: str, id: str):
 		super().__init__(scope_id, f"variable {id} is not defined")
+
+class UnusedParameterError(InterpreterError):
+	def __init__(self, scope_id: str, param: str):
+		super().__init__(scope_id, f"unused parameter {param}")
