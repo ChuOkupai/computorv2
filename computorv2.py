@@ -1,7 +1,7 @@
 import traceback
 from src.ast import RenderVisitor
 from src.interpreter import AnalyzerVisitor, Context, EvaluatorVisitor, InterpreterErrorGroup
-from src.parser import parse, tokenize
+from src.parser import parse
 
 if __name__ == '__main__':
 	ctx = Context()
@@ -15,9 +15,6 @@ if __name__ == '__main__':
 			break
 		contents += line + '\n'
 		try:
-			tokens = tokenize(contents)
-			print('---> Tokens')
-			print(tokens)
 			ast = parse(contents)
 			print('---> AST Dump')
 			print(repr(ast))
@@ -28,6 +25,7 @@ if __name__ == '__main__':
 			print('---> AST Evaluator')
 			ast = EvaluatorVisitor(ctx).visit(ast)
 			print('---> Result')
+			print(repr(ast))
 			print(RenderVisitor().visit(ast))
 		except EOFError:
 			continue

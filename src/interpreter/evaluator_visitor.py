@@ -28,24 +28,19 @@ class EvaluatorVisitor(Visitor):
 
 	def visit_assign(self, assign: Assign):
 		target = assign.target
-		assign.value = self.visit(assign.value)
-		expr = assign.value
+		expr = deepcopy(assign.value)
 		if isinstance(target, Identifier):
-			if not isinstance(expr, Constant):
-				raise TypeError('The right-hand side of an assignment must be a constant.')
-			self.context.set_variable(target.value, expr.value)
+			expr = self.visit(assign.value)
+			self.context.set_variable(target.value, expr)
 		elif isinstance(target, FunCall):
 			function_context = FunctionStorage(target.args, expr)
 			self.context.set_function(target.id.value, function_context)
 		self.res = expr
 
 	def visit_binaryop(self, bop: BinaryOp):
-		print('type(bop.left):', type(bop.left))
-		print('type(bop.right):', type(bop.right))
 		bop.left = self.visit(bop.left)
 		bop.right = self.visit(bop.right)
-		print('type(bop.left):', type(bop.left))
-		print('type(bop.right):', type(bop.right))
+		self.res = bop
 		if isinstance(bop.left, Constant) and isinstance(bop.right, Constant):
 			self.res = Constant(bop.evaluate(bop.left.value, bop.right.value))
 		else:
@@ -55,30 +50,28 @@ class EvaluatorVisitor(Visitor):
 		self.res = constant
 
 	def visit_funcall(self, funcall: FunCall):
+		funcall.args = [self.visit(arg) for arg in funcall.args]
 		id = funcall.id.value
 		f = self.context.get_function(id)
 		if isinstance(f, FunctionStorage):
 			if len(f.args) != len(funcall.args):
 				raise InvalidArgumentsLengthError(id, len(f.args), len(funcall.args))
-			args = [self.visit(arg) for arg in funcall.args]
-			self.context.push_scope()
-			for name, value in zip(f.args, args):
+			self.context.push_scope(id)
+			for name, value in zip(f.args, funcall.args):
 				self.visit(Assign(name, value))
-			self.res = self.visit(f.body)
+			self.res = self.visit(deepcopy(f.body))
 			self.context.pop_scope()
+		elif f and all(isinstance(arg, Constant) for arg in funcall.args):
+			self.res = Constant(f(*[arg.value for arg in funcall.args]))
 		else:
-			args = [self.visit(arg) for arg in funcall.args]
-			for i, arg in enumerate(args):
-				if not isinstance(arg, Constant):
-					raise TypeError(f'Argument {i} of function {id} is not a constant.')
-			self.res = Constant(f(*[arg.value for arg in args]))
+			self.res = funcall
 
 	def visit_identifier(self, id: Identifier):
-		print('visit_identifier:', id)
-		self.res = self.context.get_variable(id.value)
-		print('self.res:', self.res)
-		self.res = Constant(self.res) if self.res is not None else id
-		print(repr(self.res))
+		r = deepcopy(self.context.get_variable(id.value))
+		if r:
+			self.res = r if isinstance(r, Ast) else Constant(r)
+		else:
+			self.res = id
 
 	def visit_matdecl(self, matdecl: MatDecl):
 		values = [[self.visit(cell) for cell in row] for row in matdecl.rows]
@@ -91,4 +84,4 @@ class EvaluatorVisitor(Visitor):
 	def visit_unaryop(self, unop: UnaryOp):
 		unop.right = self.visit(unop.right)
 		if isinstance(unop.right, Constant):
-			self.res = unop.evaluate(unop.right)
+			self.res = Constant(unop.evaluate(unop.right.value))
