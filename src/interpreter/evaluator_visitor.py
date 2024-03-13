@@ -10,15 +10,15 @@ def catch_exception(func):
 		try:
 			return func(self, *args, **kwargs)
 		except Exception:
-			self.context.reset_stack()
+			self.ctx.reset_stack()
 			raise
 	return wrapped
 
 class EvaluatorVisitor(Visitor):
 	"""Evaluates the AST using the given context."""
 
-	def __init__(self, context: Context):
-		self.context = context
+	def __init__(self, ctx: Context):
+		self.ctx = ctx
 		self.res = None
 
 	@catch_exception
@@ -28,13 +28,11 @@ class EvaluatorVisitor(Visitor):
 
 	def visit_assign(self, assign: Assign):
 		target = assign.target
-		expr = deepcopy(assign.value)
+		expr = deepcopy(self.visit(assign.value))
 		if isinstance(target, Identifier):
-			expr = self.visit(assign.value)
-			self.context.set_variable(target.value, expr)
+			self.ctx.set_variable(target.value, expr)
 		elif isinstance(target, FunCall):
-			function_context = FunctionStorage(target.args, expr)
-			self.context.set_function(target.id.value, function_context)
+			self.ctx.set_function(target.id.value, FunctionStorage(target.args, expr))
 		self.res = expr
 
 	def visit_binaryop(self, bop: BinaryOp):
@@ -52,22 +50,22 @@ class EvaluatorVisitor(Visitor):
 	def visit_funcall(self, funcall: FunCall):
 		funcall.args = [self.visit(arg) for arg in funcall.args]
 		id = funcall.id.value
-		f = self.context.get_function(id)
+		f = self.ctx.get_function(id)
 		if isinstance(f, FunctionStorage):
 			if len(f.args) != len(funcall.args):
 				raise InvalidArgumentsLengthError(id, len(f.args), len(funcall.args))
-			self.context.push_scope(id)
+			self.ctx.push_scope(id)
 			for name, value in zip(f.args, funcall.args):
 				self.visit(Assign(name, value))
 			self.res = self.visit(deepcopy(f.body))
-			self.context.pop_scope()
+			self.ctx.pop_scope()
 		elif f and all(isinstance(arg, Constant) for arg in funcall.args):
 			self.res = Constant(f(*[arg.value for arg in funcall.args]))
 		else:
 			self.res = funcall
 
 	def visit_identifier(self, id: Identifier):
-		r = deepcopy(self.context.get_variable(id.value))
+		r = deepcopy(self.ctx.get_variable(id.value))
 		if r:
 			self.res = r if isinstance(r, Ast) else Constant(r)
 		else:

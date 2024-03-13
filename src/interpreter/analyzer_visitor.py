@@ -7,8 +7,8 @@ from src.interpreter import AssignExpressionError, BuiltInConstantError, BuiltIn
 class AnalyzerVisitor(Visitor):
 	"""Performs a semantic analysis of the AST."""
 
-	def __init__(self, context: Context):
-		self.context = context
+	def __init__(self, ctx: Context):
+		self.ctx = ctx
 		self.assign_target_id = None
 		self.detect_unknowns = False
 		self.unused_variables = set()
@@ -29,7 +29,7 @@ class AnalyzerVisitor(Visitor):
 		return func_args
 
 	def _push_error(self, error_type: type, *args):
-		self.errors.append(error_type(self.context.get_scope(), *args))
+		self.errors.append(error_type(self.ctx.get_scope(), *args))
 
 	def _raise_errors(self):
 		if self.errors:
@@ -50,20 +50,20 @@ class AnalyzerVisitor(Visitor):
 		target = assign.target
 		if isinstance(target, Identifier):
 			self._visit(assign.value)
-			if self.context.is_constant(target.value):
+			if self.ctx.is_constant(target.value):
 				self._push_error(BuiltInConstantError, target.value)
-			if self.context.get_depth():
-				self.context.set_variable(target.value, assign.value)
+			if self.ctx.get_depth():
+				self.ctx.set_variable(target.value, assign.value)
 		elif isinstance(target, FunCall):
 			self.assign_target_id = target.id.value
-			self.context.push_scope(self.assign_target_id)
+			self.ctx.push_scope(self.assign_target_id)
 			fs = FunctionStorage(self._check_signature(target.args), assign.value)
 			[self._visit(Assign(arg, Constant(None))) for arg in fs.args]
 			self._visit(fs.body)
 			for arg in self.unused_variables:
 				self._push_error(UnusedParameterError, arg)
-			self.context.pop_scope()
-			if self.context.is_builtin(self.assign_target_id):
+			self.ctx.pop_scope()
+			if self.ctx.is_builtin(self.assign_target_id):
 				self._push_error(BuiltInFunctionError, self.assign_target_id)
 			self.assign_target_id = None
 		else:
@@ -83,11 +83,11 @@ class AnalyzerVisitor(Visitor):
 			self._push_error(CyclicDependencyError)
 			[self._visit(arg) for arg in funcall.args]
 			return
-		f = self.context.get_function(id)
+		f = self.ctx.get_function(id)
 		if not f and self.detect_unknowns:
 			self._push_error(UndefinedFunctionError, id)
 		[self._visit(arg) for arg in funcall.args]
-		self.context.push_scope(id)
+		self.ctx.push_scope(id)
 		if isinstance(f, FunctionStorage):
 			if len(f.args) != len(funcall.args):
 				self._push_error(InvalidArgumentsLengthError, len(f.args), len(funcall.args))
@@ -95,13 +95,13 @@ class AnalyzerVisitor(Visitor):
 			self._visit(f.body)
 		elif f and len(funcall.args) > 1:
 			self._push_error(InvalidArgumentsLengthError, 1, len(funcall.args))
-		self.context.pop_scope()
+		self.ctx.pop_scope()
 
 	def visit_identifier(self, id: Identifier):
-		v = self.context.get_variable(id.value)
+		v = self.ctx.get_variable(id.value)
 		if not v and self.detect_unknowns:
 			self._push_error(UndefinedVariableError, id.value)
-		if self.context.get_scope() == self.assign_target_id and id.value in self.unused_variables:
+		if self.ctx.get_scope() == self.assign_target_id and id.value in self.unused_variables:
 			self.unused_variables.remove(id.value)
 
 	def visit_matdecl(self, matdecl: MatDecl):
