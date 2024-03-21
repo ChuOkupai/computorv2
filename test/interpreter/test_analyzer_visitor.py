@@ -1,7 +1,7 @@
 import unittest
 from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
 from src.interpreter.errors import *
-from src.interpreter import Context, FunctionStorage, AnalyzerVisitor as Fcv
+from src.interpreter import Context, FunctionStorage, AnalyzerVisitor
 
 class TestAnalyzerVisitor(unittest.TestCase):
 	"""This class checks if all exceptions are raised correctly."""
@@ -9,7 +9,7 @@ class TestAnalyzerVisitor(unittest.TestCase):
 	def _assert_errors_raised(self, expected_error_types: list[type]):
 		"""Assert that the given error types are raised."""
 		with self.assertRaises(InterpreterErrorGroup) as e:
-			Fcv(self.ctx).visit(self.ast)
+			AnalyzerVisitor(self.ctx).visit(self.ast)
 		e = e.exception
 		self.assertEqual(len(e.errors), len(expected_error_types))
 		for err, et in zip(e.errors, expected_error_types):
@@ -69,7 +69,7 @@ class TestAnalyzerVisitor(unittest.TestCase):
 	def test_matdecl(self):
 		self.ast.target = FunCall(Identifier('f'), [Identifier('x')])
 		self.ast.value = MatDecl([[Constant(1), Identifier('x')]])
-		Fcv(self.ctx).visit(self.ast)
+		AnalyzerVisitor(self.ctx).visit(self.ast)
 
 	def test_multiple_declaration_error(self):
 		self.ast.target = FunCall(Identifier('f'),
@@ -84,10 +84,10 @@ class TestAnalyzerVisitor(unittest.TestCase):
 
 	def test_solve(self):
 		with self.assertRaises(NotImplementedError):
-			Fcv(self.ctx).visit(Solve(None))
+			AnalyzerVisitor(self.ctx).visit(Solve(None))
 
 	def test_unaryop(self):
-		Fcv(self.ctx).visit(UnaryOp('-', Constant(1)))
+		AnalyzerVisitor(self.ctx).visit(UnaryOp('-', Constant(1)))
 
 	def test_unused_parameter_error(self):
 		self.ast.target = FunCall(Identifier('f'), [Identifier('x'), Identifier('y')])
