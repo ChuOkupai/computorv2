@@ -83,11 +83,16 @@ class TestAnalyzerVisitor(unittest.TestCase):
 		self._assert_errors_raised([RequireIdentifierError])
 
 	def test_solve(self):
-		with self.assertRaises(NotImplementedError):
-			AnalyzerVisitor(self.ctx).visit(Solve(None))
+		self.ast.target = Identifier('x')
+		self.ast.value = Constant(1)
+		AnalyzerVisitor(self.ctx).visit(Solve(self.ast))
 
 	def test_unaryop(self):
 		AnalyzerVisitor(self.ctx).visit(UnaryOp('-', Constant(1)))
+
+	def test_undefined_function_error(self):
+		self.ast = FunCall(Identifier('f'), [Identifier('x')])
+		self._assert_errors_raised([UndefinedFunctionError])
 
 	def test_unused_parameter_error(self):
 		self.ast.target = FunCall(Identifier('f'), [Identifier('x'), Identifier('y')])

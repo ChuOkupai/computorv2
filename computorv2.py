@@ -38,3 +38,5 @@ if __name__ == '__main__':
 				for i in e.args[0]:
 					print(i)
 		contents = ''
+		print('---> Functions')
+		[print(f'{k}: {v}') for k, v in ctx.functions.items()]

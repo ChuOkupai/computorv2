@@ -1,4 +1,5 @@
-from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, UnaryOp, Visitor
+from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp, \
+	Visitor
 from src.interpreter import AssignExpressionError, BuiltInConstantError, BuiltInFunctionError, \
 	Context, CyclicDependencyError, FunctionStorage, InterpreterErrorGroup, \
 	InvalidArgumentsLengthError, MultipleDeclarationError, RequireIdentifierError, \
@@ -10,7 +11,7 @@ class AnalyzerVisitor(Visitor):
 	def __init__(self, ctx: Context):
 		self.ctx = ctx
 		self.assign_target_id = None
-		self.detect_unknowns = False
+		self.detect_unknown_variables = False
 		self.unused_variables = set()
 		self.errors = []
 
@@ -45,8 +46,8 @@ class AnalyzerVisitor(Visitor):
 		self._raise_errors()
 
 	def visit_assign(self, assign: Assign):
-		old_detect_unknowns = self.detect_unknowns
-		self.detect_unknowns = True
+		old_detect_unknown_variables = self.detect_unknown_variables
+		self.detect_unknown_variables = True
 		target = assign.target
 		if isinstance(target, Identifier):
 			self._visit(assign.value)
@@ -68,7 +69,7 @@ class AnalyzerVisitor(Visitor):
 			self.assign_target_id = None
 		else:
 			self._push_error(AssignExpressionError)
-		self.detect_unknowns = old_detect_unknowns
+		self.detect_unknown_variables = old_detect_unknown_variables
 
 	def visit_binaryop(self, binop: BinaryOp):
 		self._visit(binop.left)
@@ -84,7 +85,7 @@ class AnalyzerVisitor(Visitor):
 			[self._visit(arg) for arg in funcall.args]
 			return
 		f = self.ctx.get_function(id)
-		if not f and self.detect_unknowns:
+		if not f:
 			self._push_error(UndefinedFunctionError, id)
 		[self._visit(arg) for arg in funcall.args]
 		self.ctx.push_scope(id)
@@ -99,7 +100,7 @@ class AnalyzerVisitor(Visitor):
 
 	def visit_identifier(self, id: Identifier):
 		v = self.ctx.get_variable(id.value)
-		if not v and self.detect_unknowns:
+		if not v and self.detect_unknown_variables:
 			self._push_error(UndefinedVariableError, id.value)
 		if self.ctx.get_scope() == self.assign_target_id and id.value in self.unused_variables:
 			self.unused_variables.remove(id.value)
@@ -107,8 +108,10 @@ class AnalyzerVisitor(Visitor):
 	def visit_matdecl(self, matdecl: MatDecl):
 		[[self._visit(cell) for cell in row] for row in matdecl.rows]
 
-	def visit_solve(self, _):
-		raise NotImplementedError
+	def visit_solve(self, solve: Solve):
+		assign = solve.assign
+		self._visit(assign.target)
+		self._visit(assign.value)
 
 	def visit_unaryop(self, unop: UnaryOp):
 		self._visit(unop.right)
