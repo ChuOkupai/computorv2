@@ -1,5 +1,5 @@
-from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp, \
-	Visitor
+from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp, Visitor
 from src.interpreter import AssignExpressionError, BuiltInConstantError, BuiltInFunctionError, \
 	Context, CyclicDependencyError, FunctionStorage, InterpreterErrorGroup, \
 	InvalidArgumentsLengthError, MultipleDeclarationError, RequireIdentifierError, \
@@ -38,6 +38,10 @@ class AnalyzerVisitor(Visitor):
 			self.errors = []
 			raise InterpreterErrorGroup(errors)
 
+	def _visit_function(self, args: list, body: Ast):
+		[self._visit(Assign(arg, Constant(None))) for arg in args]
+		self._visit(body)
+
 	def _visit(self, n):
 		n.accept(self)
 
@@ -58,9 +62,7 @@ class AnalyzerVisitor(Visitor):
 		elif isinstance(target, FunCall):
 			self.assign_target_id = target.id.value
 			self.ctx.push_scope(self.assign_target_id)
-			fs = FunctionStorage(self._check_signature(target.args), assign.value)
-			[self._visit(Assign(arg, Constant(None))) for arg in fs.args]
-			self._visit(fs.body)
+			self._visit_function(self._check_signature(target.args), assign.value)
 			for arg in self.unused_variables:
 				self._push_error(UnusedParameterError, arg)
 			self.ctx.pop_scope()
@@ -92,8 +94,7 @@ class AnalyzerVisitor(Visitor):
 		if isinstance(f, FunctionStorage):
 			if len(f.args) != len(funcall.args):
 				self._push_error(InvalidArgumentsLengthError, len(f.args), len(funcall.args))
-			[self._visit(Assign(arg, Constant(None))) for arg in f.args]
-			self._visit(f.body)
+			self._visit_function(f.args, f.body)
 		elif f and len(funcall.args) > 1:
 			self._push_error(InvalidArgumentsLengthError, 1, len(funcall.args))
 		self.ctx.pop_scope()
