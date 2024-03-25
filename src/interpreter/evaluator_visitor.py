@@ -2,8 +2,8 @@ from copy import deepcopy
 from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, \
 	Solve, UnaryOp, Visitor
 from src.dtype import Matrix
-from src.interpreter import Context, FunctionStorage, \
-	InvalidArgumentsLengthError, Context
+from src.interpreter import Context, DependenciesVisitor, FunctionStorage, \
+	InvalidArgumentsLengthError
 
 def catch_exception(func):
 	def wrapped(self, *args, **kwargs):
@@ -38,7 +38,10 @@ class EvaluatorVisitor(Visitor):
 		if isinstance(target, Identifier):
 			self.ctx.set_variable(target.value, expr)
 		elif isinstance(target, FunCall):
-			self.ctx.set_function(target.id.value, FunctionStorage(target.args, expr))
+			dv = DependenciesVisitor(self.ctx)
+			dv.visit(expr)
+			fs = FunctionStorage(target.args, expr, dv.get_user_defined_functions())
+			self.ctx.set_function(target.id.value, fs)
 			self.ctx.pop_scope()
 			self.expand_functions = old_expand_functions
 		self.res = expr

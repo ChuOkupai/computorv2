@@ -5,3 +5,4 @@ from src.ast import Ast
 class FunctionStorage:
 	args: list
 	body: Ast
+	dependencies: set = set
