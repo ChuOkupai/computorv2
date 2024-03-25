@@ -51,7 +51,7 @@ def p_expr_binary_op(p):
 	p[0] = ast.BinaryOp(*p[1:])
 
 def p_expr_implicit_mul(p):
-	'''expr : constant identifier %prec MUL'''
+	'''expr : constant identifier'''
 	p[0] = ast.BinaryOp(p[1], '*', p[2])
 
 def p_expr_group(p):
