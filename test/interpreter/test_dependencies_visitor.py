@@ -14,6 +14,14 @@ class TestDependenciesVisitor(unittest.TestCase):
 			FunctionStorage([Identifier('y')], Identifier('y')))
 		self.dv = DependenciesVisitor(self.ctx)
 
+	def test_get_undefined_variables(self):
+		self.dv.visit(BinaryOp(Identifier('x'), '+', Identifier('y')))
+		self.assertEqual(self.dv.get_undefined_variables(), {'x', 'y'})
+
+	def test_get_undefined_variables_with_constants(self):
+		self.dv.visit(BinaryOp(Identifier('x'), '+', Identifier('pi')))
+		self.assertEqual(self.dv.get_undefined_variables(), {'x'})
+
 	def test_get_user_defined_functions(self):
 		self.dv.visit(FunCall(Identifier('f'), [Identifier('x')]))
 		self.dv.visit(FunCall(Identifier('g'), [Identifier('y')]))
@@ -66,7 +74,7 @@ class TestDependenciesVisitor(unittest.TestCase):
 		expr = Assign(Identifier('x'), Constant(1))
 		self.dv.visit(expr)
 		self.assertEqual(self.dv.visited_functions, set())
-		self.assertEqual(self.dv.visited_variables, set())
+		self.assertEqual(self.dv.visited_variables, {'x'})
 
 	def test_single_builtin_function(self):
 		expr = FunCall(Identifier('sin'), [Constant(1)])
@@ -90,7 +98,7 @@ class TestDependenciesVisitor(unittest.TestCase):
 		expr = Solve(Assign(Identifier('x'), Identifier('y')))
 		self.dv.visit(expr)
 		self.assertEqual(self.dv.visited_functions, set())
-		self.assertEqual(self.dv.visited_variables, {'y'})
+		self.assertEqual(self.dv.visited_variables, {'x', 'y'})
 
 	def test_unaryop(self):
 		expr = UnaryOp('-', FunCall(Identifier('f'), [Identifier('x')]))

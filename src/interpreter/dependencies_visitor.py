@@ -9,6 +9,9 @@ class DependenciesVisitor(Visitor):
 		self.visited_functions = set()
 		self.visited_variables = set()
 
+	def get_undefined_variables(self):
+		return set(filter(lambda x: not self.ctx.get_variable(x), self.visited_variables))
+
 	def get_user_defined_functions(self):
 		return set(filter(lambda x: not self.ctx.is_builtin(x), self.visited_functions))
 
@@ -16,6 +19,7 @@ class DependenciesVisitor(Visitor):
 		n.accept(self)
 
 	def visit_assign(self, assign: Assign):
+		self.visit(assign.target)
 		self.visit(assign.value)
 
 	def visit_binaryop(self, binop: BinaryOp):

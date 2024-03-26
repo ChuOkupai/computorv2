@@ -87,6 +87,12 @@ class TestAnalyzerVisitor(unittest.TestCase):
 		self.ast.value = Constant(1)
 		AnalyzerVisitor(self.ctx).visit(Solve(self.ast))
 
+	def test_too_many_equation_variables_error(self):
+		self.ast.target = BinaryOp(Identifier('a'), '+', Identifier('b'))
+		self.ast.value = Identifier('a')
+		self.ast = Solve(self.ast)
+		self._assert_errors_raised([TooManyEquationVariablesError])
+
 	def test_unaryop(self):
 		AnalyzerVisitor(self.ctx).visit(UnaryOp('-', Constant(1)))
 

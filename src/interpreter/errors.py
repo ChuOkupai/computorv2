@@ -41,6 +41,11 @@ class RequireIdentifierError(InterpreterError):
 	def __init__(self, scope_id: str, index: int):
 		super().__init__(scope_id, f"expects an identifier for parameter {index + 1}")
 
+class TooManyEquationVariablesError(InterpreterError):
+	def __init__(self, scope_id: str, expected: int, got: int):
+		plural = 's' if expected > 1 else ''
+		super().__init__(scope_id, f"expected {expected} equation variable{plural}, got {got}")
+
 class UndefinedFunctionError(InterpreterError):
 	def __init__(self, scope_id: str, id: str):
 		super().__init__(scope_id, f"function {id} is not defined")

@@ -1,9 +1,10 @@
 from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
 	UnaryOp, Visitor
 from src.interpreter import AssignExpressionError, BuiltInConstantError, BuiltInFunctionError, \
-	Context, CyclicDependencyError, FunctionStorage, InterpreterErrorGroup, \
+	Context, CyclicDependencyError, DependenciesVisitor, FunctionStorage, InterpreterErrorGroup, \
 	InvalidArgumentsLengthError, MultipleDeclarationError, RequireIdentifierError, \
-	UndefinedFunctionError, UndefinedVariableError, UnusedParameterError
+	TooManyEquationVariablesError, UndefinedFunctionError, UndefinedVariableError, \
+	UnusedParameterError
 
 class AnalyzerVisitor(Visitor):
 	"""Performs a semantic analysis of the AST."""
@@ -113,6 +114,11 @@ class AnalyzerVisitor(Visitor):
 		assign = solve.assign
 		self._visit(assign.target)
 		self._visit(assign.value)
+		dv = DependenciesVisitor(self.ctx)
+		dv.visit(assign)
+		undefined_variables = dv.get_undefined_variables()
+		if len(undefined_variables) > 1:
+			self._push_error(TooManyEquationVariablesError, 1, len(undefined_variables))
 
 	def visit_unaryop(self, unop: UnaryOp):
 		self._visit(unop.right)
