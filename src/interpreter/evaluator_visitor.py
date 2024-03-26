@@ -1,9 +1,8 @@
 from copy import deepcopy
-from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, \
-	Solve, UnaryOp, Visitor
+from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp, Visitor
 from src.dtype import Matrix
-from src.interpreter import Context, DependenciesVisitor, FunctionStorage, \
-	InvalidArgumentsLengthError
+from src.interpreter import Context, DependenciesVisitor, FunctionStorage
 
 def catch_exception(func):
 	def wrapped(self, *args, **kwargs):
@@ -29,22 +28,21 @@ class EvaluatorVisitor(Visitor):
 
 	def visit_assign(self, assign: Assign):
 		target = assign.target
-		if isinstance(target, FunCall):
+		if isinstance(target, Identifier):
+			self.res = self.visit(assign.value)
+			self.ctx.set_variable(target.value, self.res)
+		elif isinstance(target, FunCall):
 			old_expand_functions = self.expand_functions
 			self.expand_functions = False
 			self.ctx.push_scope(target.id.value)
 			[self.ctx.set_variable(arg.value, arg) for arg in target.args]
-		expr = deepcopy(self.visit(assign.value))
-		if isinstance(target, Identifier):
-			self.ctx.set_variable(target.value, expr)
-		elif isinstance(target, FunCall):
-			dv = DependenciesVisitor(self.ctx)
-			dv.visit(expr)
-			fs = FunctionStorage(target.args, expr, dv.get_user_defined_functions())
-			self.ctx.set_function(target.id.value, fs)
+			self.res = self.visit(assign.value)
 			self.ctx.pop_scope()
+			dv = DependenciesVisitor(self.ctx)
+			dv.visit(self.res)
+			fs = FunctionStorage(target.args, self.res, dv.get_user_defined_functions())
+			self.ctx.set_function(target.id.value, fs)
 			self.expand_functions = old_expand_functions
-		self.res = expr
 
 	def visit_binaryop(self, bop: BinaryOp):
 		bop.left = self.visit(bop.left)
@@ -63,11 +61,8 @@ class EvaluatorVisitor(Visitor):
 		id = funcall.id.value
 		f = self.ctx.get_function(id)
 		if isinstance(f, FunctionStorage):
-			if len(f.args) != len(funcall.args):
-				raise InvalidArgumentsLengthError(id, len(f.args), len(funcall.args))
 			self.ctx.push_scope(id)
-			for name, value in zip(f.args, funcall.args):
-				self.visit(Assign(name, value))
+			[self.visit(Assign(name, value)) for name, value in zip(f.args, funcall.args)]
 			self.res = self.visit(deepcopy(f.body))
 			self.ctx.pop_scope()
 			if not self.expand_functions and not isinstance(self.res, Constant):
@@ -99,3 +94,5 @@ class EvaluatorVisitor(Visitor):
 		unop.right = self.visit(unop.right)
 		if isinstance(unop.right, Constant):
 			self.res = Constant(unop.evaluate(unop.right.value))
+		else:
+			self.res = unop
