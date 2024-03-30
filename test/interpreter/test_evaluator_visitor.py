@@ -1,8 +1,7 @@
 import unittest
 from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
 from src.dtype import Matrix
-from src.interpreter.errors import *
-from src.interpreter import Context, EvaluatorVisitor, FunctionStorage
+from src.interpreter import Context, EvaluatorVisitor, FunctionStorage, InterpreterErrorGroup
 
 class TestEvaluatorVisitor(unittest.TestCase):
 	"""This class tests the EvaluatiorVisitor class."""
@@ -119,6 +118,16 @@ class TestEvaluatorVisitor(unittest.TestCase):
 		ast = MatDecl([[Constant(1), Constant(2)], [Constant(3), Constant(4)]])
 		self.ev.visit(ast)
 		self._assert_constant_eq(self.ev.res, Matrix([[1, 2], [3, 4]]))
+
+	def test_reassign_function_with_different_args(self):
+		ast = Assign(FunCall(Identifier('g'), [Identifier('x')]),
+			FunCall(Identifier('f'), [Identifier('x')]))
+		self.ev.visit(ast)
+		self.assertEqual(repr(self.ev.res), "FunCall(Identifier('f'), [Identifier('x')])")
+		ast = Assign(FunCall(Identifier('f'), [Identifier('x'), Identifier('y')]),
+			BinaryOp(Identifier('x'), '+', Identifier('y')))
+		with self.assertRaises(InterpreterErrorGroup):
+			self.ev.visit(ast)
 
 	def test_solve(self):
 		ast = Solve(Assign(BinaryOp(Identifier('x'), '+', Constant(1)), Constant(8)))

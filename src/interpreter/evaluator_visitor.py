@@ -2,7 +2,8 @@ from copy import deepcopy
 from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
 	UnaryOp, Visitor
 from src.dtype import Matrix
-from src.interpreter import Context, DependenciesVisitor, FunctionStorage
+from src.interpreter import Context, DependenciesVisitor, FunctionStorage, \
+	InterpreterErrorGroup, RemovedFunctionError
 
 def catch_exception(func):
 	def wrapped(self, *args, **kwargs):
@@ -32,17 +33,26 @@ class EvaluatorVisitor(Visitor):
 			self.res = self.visit(assign.value)
 			self.ctx.set_variable(target.value, self.res)
 		elif isinstance(target, FunCall):
+			id = target.id.value
 			old_expand_functions = self.expand_functions
 			self.expand_functions = False
-			self.ctx.push_scope(target.id.value)
+			self.ctx.push_scope(id)
 			[self.ctx.set_variable(arg.value, arg) for arg in target.args]
 			self.res = self.visit(assign.value)
 			self.ctx.pop_scope()
 			dv = DependenciesVisitor(self.ctx)
 			dv.visit(self.res)
+			old_dependencies = set()
+			fs = self.ctx.get_function(id)
+			if fs and len(fs.args) != len(target.args):
+				old_dependencies = self.ctx.get_functions_using_dependency(id)
 			fs = FunctionStorage(target.args, self.res, dv.get_user_defined_functions())
-			self.ctx.set_function(target.id.value, fs)
+			self.ctx.set_function(id, fs)
 			self.expand_functions = old_expand_functions
+			[self.ctx.unset_function(dep) for dep in old_dependencies]
+			old_dependencies = [RemovedFunctionError(dep, id) for dep in old_dependencies]
+			if old_dependencies:
+				raise InterpreterErrorGroup(old_dependencies)
 
 	def visit_binaryop(self, bop: BinaryOp):
 		bop.left = self.visit(bop.left)

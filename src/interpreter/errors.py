@@ -37,6 +37,11 @@ class MultipleDeclarationError(InterpreterError):
 	def __init__(self, scope_id: str, arg: Identifier):
 		super().__init__(scope_id, f"multiple declarations of parameter {arg.value}")
 
+class RemovedFunctionError(InterpreterError):
+	def __init__(self, id: str, call_id: str):
+		super().__init__(None,
+			f"function {id} has been removed due to an invalid function call to {call_id}")
+
 class RequireIdentifierError(InterpreterError):
 	def __init__(self, scope_id: str, index: int):
 		super().__init__(scope_id, f"expects an identifier for parameter {index + 1}")

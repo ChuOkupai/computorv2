@@ -28,6 +28,13 @@ class Context:
 		self.functions = {}
 		self.scopes = [Scope(None, {})]
 
+	def get_all_symbols(self):
+		symbols = set(self.builtins.keys())
+		symbols |= set(self.constants.keys())
+		symbols |= set(self.functions.keys())
+		symbols |= {k for k in self.scopes[-1].variables.keys()}
+		return symbols
+
 	def get_depth(self):
 		return len(self.scopes) - 1
 
@@ -37,6 +44,9 @@ class Context:
 		if self.is_builtin(id):
 			return self.builtins[id]
 		return None
+
+	def get_functions_using_dependency(self, dependency_id: str):
+		return {k for k, v in self.functions.items() if dependency_id in v.dependencies}
 
 	def get_scope(self):
 		return self.scopes[-1].id
@@ -71,3 +81,6 @@ class Context:
 
 	def set_variable(self, id: str, value):
 		self.scopes[-1].variables[id] = value
+
+	def unset_function(self, id: str):
+		self.functions.pop(id)

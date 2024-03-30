@@ -23,3 +23,4 @@
 - Built-in commands
 - Matrix inversion
 - Commands history
+- Auto-completion

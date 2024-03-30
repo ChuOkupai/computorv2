@@ -7,6 +7,14 @@ class TestContext(unittest.TestCase):
 	def setUp(self):
 		self.ctx = Context()
 
+	def test_get_all_symbols(self):
+		self.assertIsInstance(self.ctx.get_all_symbols(), set)
+
+	def test_get_all_symbols_set_variable(self):
+		self.assertFalse('foo' in self.ctx.get_all_symbols())
+		self.ctx.set_variable('foo', 42)
+		self.assertTrue('foo' in self.ctx.get_all_symbols())
+
 	def test_get_depth(self):
 		self.assertEqual(self.ctx.get_depth(), 0)
 
@@ -25,9 +33,15 @@ class TestContext(unittest.TestCase):
 		self.assertEqual(self.ctx.get_function('abs'), abs)
 
 	def test_get_function_user_defined(self):
-		f = FunctionStorage(None, None)
+		f = FunctionStorage([], None)
 		self.ctx.set_function('f', f)
 		self.assertEqual(self.ctx.get_function('f'), f)
+
+	def test_get_functions_using_dependency(self):
+		self.ctx.set_function('f', FunctionStorage([], None, {'x', 'y'}))
+		self.ctx.set_function('g', FunctionStorage([], None, {'f'}))
+		self.assertEqual(self.ctx.get_functions_using_dependency('f'), {'g'})
+		self.assertEqual(self.ctx.get_functions_using_dependency('x'), {'f'})
 
 	def test_get_scope(self):
 		self.assertEqual(self.ctx.get_scope(), None)
@@ -125,3 +139,8 @@ class TestContext(unittest.TestCase):
 		self.ctx.set_variable('x', 42)
 		self.ctx.pop_scope()
 		self.assertIsNone(self.ctx.get_variable('x'))
+
+	def test_unset_function(self):
+		self.ctx.set_function('f', None)
+		self.ctx.unset_function('f')
+		self.assertIsNone(self.ctx.get_function('f'))
