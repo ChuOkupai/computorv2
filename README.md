@@ -24,3 +24,4 @@
 - Matrix inversion
 - Commands history
 - Auto-completion
+- Support for digits and underscores in function and variable names

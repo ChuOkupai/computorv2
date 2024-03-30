@@ -65,4 +65,8 @@ class TestParser(unittest.TestCase):
 
 	def test_invalid_variable(self):
 		with self.assertRaises(SyntaxError):
-			parse('var1 = 2')
+			parse('_var = 2')
+
+	def test_unexcepted_token(self):
+		with self.assertRaises(SyntaxError):
+			parse('2 + * 2')

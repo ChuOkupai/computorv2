@@ -55,7 +55,7 @@ def t_FLOAT(t):
 	return t
 
 def t_ID(t):
-	r'[a-zA-Z]+'
+	r'[a-zA-Z][a-zA-Z0-9_]*'
 	t.value = str(t.value)
 	return t
 
