@@ -90,9 +90,11 @@ class EvaluatorVisitor(Visitor):
 			self.res = id
 
 	def visit_matdecl(self, matdecl: MatDecl):
-		values = [[self.visit(cell) for cell in row] for row in matdecl.rows]
-		if all(isinstance(cell, Constant) for row in values for cell in row):
-			self.res = Constant(Matrix([[cell.value for cell in row] for row in values]))
+		matdecl.rows = [[self.visit(cell) for cell in row] for row in matdecl.rows]
+		if all(isinstance(cell, Constant) for row in matdecl.rows for cell in row):
+			self.res = Constant(Matrix([[cell.value for cell in row] for row in matdecl.rows]))
+		else:
+			self.res = matdecl
 
 	def visit_solve(self, solve: Solve):
 		assign = solve.assign

@@ -119,6 +119,11 @@ class TestEvaluatorVisitor(unittest.TestCase):
 		self.ev.visit(ast)
 		self._assert_constant_eq(self.ev.res, Matrix([[1, 2], [3, 4]]))
 
+	def test_mat_decl_non_const(self):
+		ast = MatDecl([[Constant(1), Identifier('x')], [Constant(3), Constant(4)]])
+		self.ev.visit(ast)
+		self.assertEqual(repr(self.ev.res), "MatDecl([[Constant(1), Identifier('x')], [Constant(3), Constant(4)]])")
+
 	def test_reassign_function_with_different_args(self):
 		ast = Assign(FunCall(Identifier('g'), [Identifier('x')]),
 			FunCall(Identifier('f'), [Identifier('x')]))
