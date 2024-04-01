@@ -1,7 +1,8 @@
 import os, readline, sys, traceback
 from src.ast import Ast, RenderVisitor
 from src.cli import Completer
-from src.interpreter import AnalyzerVisitor, Context, EvaluatorVisitor, InterpreterErrorGroup
+from src.interpreter import AnalyzerVisitor, Context, EvaluatorVisitor, InterpreterErrorGroup, \
+	OptimizerVisitor
 from src.parser import parse
 
 class Console():
@@ -26,6 +27,8 @@ class Console():
 		AnalyzerVisitor(self.ctx).visit(ast)
 		print('---> AST Evaluator')
 		ast = EvaluatorVisitor(self.ctx).visit(ast)
+		print('---> AST Optimizer')
+		ast = OptimizerVisitor(self.ctx).visit(ast)
 		print('---> Result')
 		print(repr(ast))
 		print(RenderVisitor().visit(ast))
