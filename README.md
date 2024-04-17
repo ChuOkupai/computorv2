@@ -3,6 +3,7 @@
 ## Some improvements over the subject
 
 - Evaluation of the expression can be done without using the `= ?` syntax
+- Implicit multiplication has a higher precedence than every other operators (2x^3 is not equivalent to 2*x^3!)
 
 ## Bonus
 
