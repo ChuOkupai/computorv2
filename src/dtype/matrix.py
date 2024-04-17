@@ -127,7 +127,8 @@ class Matrix:
 		return self._do_op(m, lambda x, y: y - x)
 
 	def __str__(self):
-		return '\n'.join('[' + ', '.join(str(e) for e in row) + ']' for row in self.values)
+		rows = '; '.join('[' + ', '.join(str(e) for e in row) + ']' for row in self.values)
+		return '[' + rows + ']'
 
 	def __sub__(self, other):
 		return self._do_op(other, lambda x, y: x - y)
