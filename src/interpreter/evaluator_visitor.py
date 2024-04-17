@@ -106,5 +106,9 @@ class EvaluatorVisitor(Visitor):
 		unop.right = self.visit(unop.right)
 		if isinstance(unop.right, Constant):
 			self.res = Constant(unop.evaluate(unop.right.value))
+		elif unop.op == '+':
+			self.res = unop.right
+		elif isinstance(unop.right, UnaryOp):
+			self.res = unop.right.right
 		else:
 			self.res = unop

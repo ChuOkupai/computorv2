@@ -149,6 +149,16 @@ class TestEvaluatorVisitor(unittest.TestCase):
 		self.ev.visit(ast)
 		self._assert_constant_eq(self.ev.res, 1)
 
+	def test_unaryop_simplify_positive(self):
+		ast = UnaryOp('+', Identifier('z'))
+		self.ev.visit(ast)
+		self.assertEqual(repr(self.ev.res), "Identifier('z')")
+
+	def test_unaryop_simplify_double_negative(self):
+		ast = UnaryOp('-', UnaryOp('-', Identifier('z')))
+		self.ev.visit(ast)
+		self.assertEqual(repr(self.ev.res), "Identifier('z')")
+
 	def test_unaryop_undefined(self):
 		ast = UnaryOp('-', Identifier('x'))
 		self.ev.visit(ast)
