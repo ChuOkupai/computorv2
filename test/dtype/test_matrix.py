@@ -204,11 +204,11 @@ class TestMatrix(unittest.TestCase):
 			1 / Matrix.identity(3)
 
 	def test_str(self):
-		self.assertEqual(str(Matrix([[1, 2], [3, 4]])), '[1, 2]\n[3, 4]')
-		self.assertEqual(str(Matrix([[1., 2.], [3., 4.]])), '[1.0, 2.0]\n[3.0, 4.0]')
-		self.assertEqual(str(Matrix.identity(2)), '[1.0, 0.0]\n[0.0, 1.0]')
-		self.assertEqual(str(Matrix([[Complex(), Complex(1)]])), '[0i, 1 + 0i]')
-		self.assertEqual(str(Matrix([[Complex(1, 2)], [Complex(3, 4)]])), '[1 + 2i]\n[3 + 4i]')
+		self.assertEqual(str(Matrix([[1, 2], [3, 4]])), '[[1, 2]; [3, 4]]')
+		self.assertEqual(str(Matrix([[1., 2.], [3., 4.]])), '[[1.0, 2.0]; [3.0, 4.0]]')
+		self.assertEqual(str(Matrix.identity(2)), '[[1.0, 0.0]; [0.0, 1.0]]')
+		self.assertEqual(str(Matrix([[Complex(), Complex(1)]])), '[[0i, 1 + 0i]]')
+		self.assertEqual(str(Matrix([[Complex(1, 2)], [Complex(3, 4)]])), '[[1 + 2i]; [3 + 4i]]')
 
 	def test_sub(self):
 		u = Matrix([[1., 2.], [3., 4.]])
