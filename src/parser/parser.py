@@ -109,8 +109,8 @@ def p_solve(p):
 # Error rule for syntax errors
 def p_error(p):
 	if not p:
-		raise EOFError("Unexpected end of file")
-	raise SyntaxError("Syntax error near unexpected token '%s' on line %d" % (p.value, p.lineno))
+		raise EOFError("unexpected end of file")
+	raise SyntaxError("syntax error near unexpected token '%s' on line %d" % (p.value, p.lineno))
 
 parser = yacc.yacc()
 

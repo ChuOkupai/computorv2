@@ -71,7 +71,7 @@ def t_newline(t):
 
 # Error handling rule
 def t_error(t):
-	raise SyntaxError("Illegal character '%s' on line %d" % (t.value[0], t.lineno))
+	raise SyntaxError("illegal character '%s' on line %d" % (t.value[0], t.lineno))
 
 # Build the lexer
 lexer = lex.lex()
