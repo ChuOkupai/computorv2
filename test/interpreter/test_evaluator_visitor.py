@@ -124,6 +124,12 @@ class TestEvaluatorVisitor(unittest.TestCase):
 		self.ev.visit(ast)
 		self.assertEqual(repr(self.ev.res), "MatDecl([[Constant(1), Identifier('x')], [Constant(3), Constant(4)]])")
 
+	def test_mat_decl_implicit_conversion(self):
+		ast = MatDecl([[Constant(1), Identifier('i'), Constant(3)]])
+		self.ev.visit(ast)
+		self.assertEqual(repr(self.ev.res),
+			"Constant(Matrix([[Complex(1), Complex(0, 1), Complex(3)]]))")
+
 	def test_reassign_function_with_different_args(self):
 		ast = Assign(FunCall(Identifier('g'), [Identifier('x')]),
 			FunCall(Identifier('f'), [Identifier('x')]))
@@ -136,12 +142,12 @@ class TestEvaluatorVisitor(unittest.TestCase):
 
 	def test_solve(self):
 		ast = Solve(Assign(BinaryOp(Identifier('x'), '+', Constant(1)), Constant(8)))
-		self.assertEquals(repr(self.ev.visit(ast)), "Constant(7)")
+		self.assertEqual(repr(self.ev.visit(ast)), "Constant(7)")
 
 	def test_solve_2(self):
 		ast = Solve(Assign(BinaryOp(BinaryOp(BinaryOp(Identifier('x'), '^', Constant(2)), '+',
 		BinaryOp(Constant(3), '*', Identifier('x'))), '-', Constant(4)), Constant(0)))
-		self.assertEquals(repr(self.ev.visit(ast)), "Constant(Matrix([[-4, 1]]))")
+		self.assertEqual(repr(self.ev.visit(ast)), "Constant(Matrix([[-4, 1]]))")
 
 	def test_unaryop_constant(self):
 		ast = UnaryOp('-', Constant(1))

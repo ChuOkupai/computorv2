@@ -1,5 +1,5 @@
 from copy import deepcopy
-from src.dtype import is_close, is_literal
+from src.dtype import Complex, is_close, is_literal
 
 class Matrix:
 	pass
@@ -25,7 +25,11 @@ class Matrix:
 		if not is_literal(values[0][0]):
 			raise ValueError('all elements in the matrix must be literals.')
 		if any(any(not isinstance(y, type(values[0][0])) for y in x) for x in values):
-			raise ValueError('all elements in the matrix must be of the same type.')
+			if any(any(isinstance(y, Complex) for y in x) for x in values):
+				values = [[x if isinstance(x, Complex) else Complex(x) for x in r] for r in
+					values]
+			else:
+				raise ValueError('all elements in the matrix must be of the same type.')
 		self.shape = (len(values), len(values[0]))
 		self.values = values
 
