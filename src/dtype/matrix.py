@@ -19,6 +19,14 @@ class Matrix:
 	def identity(n: int, dtype=float):
 		return Matrix([[dtype(i == j) for j in range(n)] for i in range(n)])
 
+	@staticmethod
+	def ones(n: int, m: int, dtype=float):
+		return Matrix([[dtype(1) for _ in range(m)] for _ in range(n)])
+
+	@staticmethod
+	def zeros(n: int, m: int, dtype=float):
+		return Matrix([[dtype(0) for _ in range(m)] for _ in range(n)])
+
 	def __init__(self, values: list):
 		if any(len(x) != len(values[0]) for x in values):
 			raise self.InvalidShapeError

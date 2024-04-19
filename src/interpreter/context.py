@@ -1,5 +1,5 @@
 import math
-from src.dtype import Complex
+from src.dtype import Complex, Matrix
 from src.interpreter import FunctionStorage, Scope
 
 class Context:
@@ -10,10 +10,13 @@ class Context:
 		'abs': abs,
 		'cos': math.cos,
 		'exp': math.exp,
+		'identity': Matrix.identity,
 		'log': math.log,
+		'ones': Matrix.ones,
 		'sin': math.sin,
 		'sqrt': math.sqrt,
-		'tan': math.tan
+		'tan': math.tan,
+		'zeros': Matrix.zeros
 	}
 
 	constants = {

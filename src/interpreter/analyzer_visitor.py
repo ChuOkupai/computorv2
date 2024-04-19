@@ -1,3 +1,4 @@
+from inspect import signature
 from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
 	UnaryOp, Visitor
 from src.interpreter import AssignExpressionError, BuiltInConstantError, BuiltInFunctionError, \
@@ -96,8 +97,11 @@ class AnalyzerVisitor(Visitor):
 			if len(f.args) != len(funcall.args):
 				self._push_error(InvalidArgumentsLengthError, len(f.args), len(funcall.args))
 			self._visit_function(f.args, f.body)
-		elif f and len(funcall.args) > 1:
-			self._push_error(InvalidArgumentsLengthError, 1, len(funcall.args))
+		elif f:
+			sig = signature(f)
+			n_args = len([p for p in sig.parameters.values() if p.default == p.empty])
+			if len(funcall.args) != n_args:
+				self._push_error(InvalidArgumentsLengthError, n_args, len(funcall.args))
 		self.ctx.pop_scope()
 
 	def visit_identifier(self, id: Identifier):

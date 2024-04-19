@@ -9,6 +9,16 @@ class TestMatrix(unittest.TestCase):
 		self.assertEqual(m.values, [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]])
 		self.assertEqual(m.shape, (3, 3))
 
+	def test_ones(self):
+		m = Matrix.ones(2, 3)
+		self.assertEqual(m.values, [[1., 1., 1.], [1., 1., 1.]])
+		self.assertEqual(m.shape, (2, 3))
+
+	def test_zeros(self):
+		m = Matrix.zeros(3, 2)
+		self.assertEqual(m.values, [[0., 0.], [0., 0.], [0., 0.]])
+		self.assertEqual(m.shape, (3, 2))
+
 	def test_init(self):
 		m = Matrix([[1., 2., 3.], [4., 5., 6.]])
 		self.assertEqual(m.values, [[1., 2., 3.], [4., 5., 6.]])
