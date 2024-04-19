@@ -33,6 +33,14 @@ class InvalidArgumentsLengthError(InterpreterError):
 		plural = 's' if expected > 1 else ''
 		super().__init__(scope_id, f"expected {expected} argument{plural}, got {got}")
 
+class InvalidPolynomialDegreeError(InterpreterError):
+	def __init__(self, degree: int):
+		super().__init__(None, f"cannot solve polynomial of degree {degree}")
+
+class InvalidPolynomialError(InterpreterError):
+	def __init__(self):
+		super().__init__(None, "invalid polynomial expression")
+
 class MultipleDeclarationError(InterpreterError):
 	def __init__(self, scope_id: str, arg: Identifier):
 		super().__init__(scope_id, f"multiple declarations of parameter {arg.value}")

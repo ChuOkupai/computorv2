@@ -2,8 +2,8 @@ from copy import deepcopy
 from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
 	UnaryOp, Visitor
 from src.dtype import Matrix
-from src.interpreter import Context, DependenciesVisitor, FunctionStorage, \
-	InterpreterErrorGroup, RemovedFunctionError
+from src.interpreter import Context, DependenciesVisitor, EquationSolverFactory, \
+	FunctionStorage, InterpreterErrorGroup, PolynomialVisitor, RemovedFunctionError
 
 def catch_exception(func):
 	def wrapped(self, *args, **kwargs):
@@ -100,7 +100,15 @@ class EvaluatorVisitor(Visitor):
 		assign = solve.assign
 		assign.target = self.visit(assign.target)
 		assign.value = self.visit(assign.value)
-		raise NotImplementedError('solve statements are not supported yet.')
+		pv = PolynomialVisitor()
+		p = pv.visit(solve)
+		solver = EquationSolverFactory.create(p)
+		r = solver.solve(p)
+		if isinstance(r, list):
+			r = Matrix([[int(x) if isinstance(x, float) and x % 1 == 0 else x for x in r]])
+		elif isinstance(r, float) and r % 1 == 0:
+			r = int(r)
+		self.res = Constant(r)
 
 	def visit_unaryop(self, unop: UnaryOp):
 		unop.right = self.visit(unop.right)

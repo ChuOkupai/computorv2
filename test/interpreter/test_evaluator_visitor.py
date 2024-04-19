@@ -136,8 +136,12 @@ class TestEvaluatorVisitor(unittest.TestCase):
 
 	def test_solve(self):
 		ast = Solve(Assign(BinaryOp(Identifier('x'), '+', Constant(1)), Constant(8)))
-		with self.assertRaises(NotImplementedError):
-			self.ev.visit(ast)
+		self.assertEquals(repr(self.ev.visit(ast)), "Constant(7)")
+
+	def test_solve_2(self):
+		ast = Solve(Assign(BinaryOp(BinaryOp(BinaryOp(Identifier('x'), '^', Constant(2)), '+',
+		BinaryOp(Constant(3), '*', Identifier('x'))), '-', Constant(4)), Constant(0)))
+		self.assertEquals(repr(self.ev.visit(ast)), "Constant(Matrix([[-4, 1]]))")
 
 	def test_unaryop_constant(self):
 		ast = UnaryOp('-', Constant(1))
