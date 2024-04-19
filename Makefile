@@ -1,3 +1,5 @@
+all: coverage run
+
 clean:
 	find . -type d -name '__pycache__' |  xargs $(RM) -r
 	$(RM) src/parser/parser.out src/parser/parsetab.py .coverage coverage.xml
@@ -13,4 +15,4 @@ run:
 test:
 	python3 -m unittest
 
-.PHONY: clean coverage run test
+.PHONY: all clean coverage run test
