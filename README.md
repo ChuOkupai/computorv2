@@ -2,7 +2,7 @@
 
 This project is the direct continuation of [computorv1](https://github.com/ChuOkupai/computorv1).
 
-Computor v2 is a more advanced program that works like an advanced calculator. It can evaluate complex expressions, solve equations, store variables and functions...
+Computor v2 is a program that works like an advanced calculator. It can evaluate complex expressions, solve equations, store variables and functions...
 It has been written as part of the 42 school curriculum.
 
 My motivation was drastically reduced during the project due to the few experience points gained for the time invested.
