@@ -1,4 +1,5 @@
 import math, unittest
+from src.dtype import Matrix
 from src.interpreter import Context, FunctionStorage
 
 class TestContext(unittest.TestCase):
@@ -6,6 +7,13 @@ class TestContext(unittest.TestCase):
 
 	def setUp(self):
 		self.ctx = Context()
+
+	def test_builtin_inv(self):
+		inv = self.ctx.get_function('inv')
+		with self.assertRaises(TypeError):
+			inv(42)
+		m = Matrix([[4, 3], [1, 1]])
+		self.assertEqual(inv(m), Matrix([[1, -3], [-1, 4]]))
 
 	def test_get_all_symbols(self):
 		self.assertIsInstance(self.ctx.get_all_symbols(), set)

@@ -2,6 +2,11 @@ import math
 from src.dtype import Complex, Matrix
 from src.interpreter import FunctionStorage, Scope
 
+def matrix_inv(m):
+	if not isinstance(m, Matrix):
+		raise TypeError('matrix inversion is only defined for matrices.')
+	return m.inverse()
+
 class Context:
 	"""This class is used to store constants, variables, built-in functions and user-defined
 	functions."""
@@ -11,6 +16,7 @@ class Context:
 		'cos': math.cos,
 		'exp': math.exp,
 		'identity': Matrix.identity,
+		'inv': matrix_inv,
 		'log': math.log,
 		'ones': Matrix.ones,
 		'sin': math.sin,
