@@ -77,12 +77,15 @@ make run
 ```
 Then, you can enter your expressions in the prompt that appears.
 
-### 💡Tips
+### 💡 Tips
 
-- Some examples are available in the [examples](examples) directory.
-- You can use the `help` command to display the list of available commands.
-- You can use the `up` and `down` arrow keys to navigate through the commands history.
-- You can exit the program by pressing `Ctrl + D`.
+- 🔬 Some examples are available in the [examples](examples) directory.
+- ⚠️ Implicit multiplication has a higher priority than every other operation, so:
+	- `2x ^ 3` is evaluated as `(2 * x) ^ 3`
+	- `2 * x ^ 3` is evaluated as `2 * (x ^ 3)`
+- 💡 You can use the `help` command to display the list of available commands.
+- 💡 You can use the `up` and `down` arrow keys to navigate through the commands history.
+- 💡 You can exit the program by pressing `Ctrl + D`.
 
 ## 🧪 Testing
 
