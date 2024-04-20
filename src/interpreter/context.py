@@ -7,6 +7,11 @@ def matrix_inv(m):
 		raise TypeError('matrix inversion is only defined for matrices.')
 	return m.inverse()
 
+def matrix_transpose(m):
+	if not isinstance(m, Matrix):
+		raise TypeError('matrix transposition is only defined for matrices.')
+	return m.transpose()
+
 class Context:
 	"""This class is used to store constants, variables, built-in functions and user-defined
 	functions."""
@@ -22,6 +27,7 @@ class Context:
 		'sin': math.sin,
 		'sqrt': math.sqrt,
 		'tan': math.tan,
+		'transpose': matrix_transpose,
 		'zeros': Matrix.zeros
 	}
 

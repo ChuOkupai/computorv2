@@ -101,8 +101,11 @@ class AnalyzerVisitor(Visitor):
 				self._push_error(InvalidArgumentsLengthError, len(f.args), len(funcall.args))
 			self._visit_function(f.args, f.body)
 		elif f:
-			sig = signature(f)
-			n_args = len([p for p in sig.parameters.values() if p.default == p.empty])
+			try:
+				sig = signature(f)
+				n_args = len([p for p in sig.parameters.values() if p.default == p.empty])
+			except ValueError:
+				n_args = 1
 			if len(funcall.args) != n_args:
 				self._push_error(InvalidArgumentsLengthError, n_args, len(funcall.args))
 		self.ctx.pop_scope()

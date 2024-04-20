@@ -1,4 +1,4 @@
-import os, readline, sys, traceback
+import os, readline, sys
 from src.ast import Ast, RenderVisitor
 from src.cli import Completer
 from src.interpreter import AnalyzerVisitor, Context, EvaluatorVisitor, InterpreterErrorGroup
@@ -40,7 +40,11 @@ class Console():
 		while True:
 			line = ''
 			try:
-				line = input('... ' if buf else '> ')
+				if sys.stdin.isatty():
+					prompt = '... ' if buf else '> '
+				else:
+					prompt = ''
+				line = input(prompt)
 				if not line:
 					continue
 			except EOFError:
@@ -56,9 +60,10 @@ class Console():
 				for i in e.errors:
 					print(i)
 			except Exception as e:
-				traceback.print_exc()
 				if isinstance(e.args[0],list):
 					for i in e.args[0]:
 						print(i)
+				else:
+					print(e)
 			buf = ''
 		self._save_history()
