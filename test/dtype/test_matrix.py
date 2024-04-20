@@ -24,6 +24,26 @@ class TestMatrix(unittest.TestCase):
 		self.assertEqual(m.values, [[1., 2., 3.], [4., 5., 6.]])
 		self.assertEqual(m.shape, (2, 3))
 
+	def test_init_complex(self)	:
+		m = Matrix([[Complex(), Complex(1)], [Complex(2, 3), Complex(4, 5)]])
+		self.assertEqual(m.values, [[Complex(), Complex(1)], [Complex(2, 3), Complex(4, 5)]])
+		self.assertEqual(m.shape, (2, 2))
+
+	def test_init_complex_promotion(self):
+		m = Matrix([[Complex(1), 2], [3, Complex(4)]])
+		self.assertEqual(m.values, [[Complex(1), Complex(2)], [Complex(3), Complex(4)]])
+		self.assertEqual(m.shape, (2, 2))
+
+	def test_init_float_promotion(self):
+		m = Matrix([[1, 2], [3.5, 4]])
+		self.assertEqual(m.values, [[1., 2.], [3.5, 4.]])
+		self.assertEqual(m.shape, (2, 2))
+
+	def test_init_mixed_promotion(self):
+		m = Matrix([[1, 2.4], [Complex(3), 4]])
+		self.assertEqual(m.values, [[Complex(1), Complex(2.4)], [Complex(3), Complex(4)]])
+		self.assertEqual(m.shape, (2, 2))
+
 	def test_init_invalid_shape(self):
 		with self.assertRaises(ValueError):
 			Matrix([[1, 2], [3, 4, 6]])
@@ -31,10 +51,6 @@ class TestMatrix(unittest.TestCase):
 	def test_init_invalid_type(self):
 		with self.assertRaises(ValueError):
 			Matrix([[1, 2], [3, 'oops']])
-
-	def test_init_mixed_type(self):
-		with self.assertRaises(ValueError):
-			Matrix([[1, 2], [3, 4.5]])
 
 	def test_init_invalid_literal(self):
 		with self.assertRaises(ValueError):

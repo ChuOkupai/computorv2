@@ -34,11 +34,14 @@ class Matrix:
 		if not utils.is_literal(values[0][0]):
 			raise ValueError('all elements in the matrix must be literals.')
 		if any(any(not isinstance(y, type(values[0][0])) for y in x) for x in values):
+			vtype = None
 			if any(any(isinstance(y, dtype.Complex) for y in x) for x in values):
-				values = [[x if isinstance(x, dtype.Complex) else dtype.Complex(x) for x in r] for r in
-					values]
+				vtype = dtype.Complex
+			elif any(any(isinstance(y, float) for y in x) for x in values):
+				vtype = float
 			else:
 				raise ValueError('all elements in the matrix must be of the same type.')
+			values = [[x if isinstance(x, vtype) else vtype(x) for x in r] for r in values]
 		self.shape = (len(values), len(values[0]))
 		self.values = values
 
