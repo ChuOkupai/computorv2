@@ -18,19 +18,10 @@ class Console():
 		self.ctx = Context()
 
 	def _exec(self, ast: Ast):
-		print('---> AST Dump')
-		print(repr(ast))
-		print('---> AST Render')
-		print(RenderVisitor().visit(ast))
-		print('---> AST Analyzer')
 		AnalyzerVisitor(self.ctx).visit(ast)
-		print('---> AST Evaluator')
 		ast = EvaluatorVisitor(self.ctx).visit(ast)
-		if not ast:
-			return
-		print('---> Result')
-		print(repr(ast))
-		print(RenderVisitor().visit(ast))
+		if ast:
+			print(RenderVisitor().visit(ast))
 
 	def _save_history(self):
 		if self.histfile:
