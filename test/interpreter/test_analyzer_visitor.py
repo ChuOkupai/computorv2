@@ -25,6 +25,10 @@ class TestAnalyzerVisitor(unittest.TestCase):
 		self.ast.value = Identifier('x')
 		self._assert_errors_raised([AssignExpressionError])
 
+	def test_built_in_call(self):
+		self.ast = FunCall(Identifier('log'), [Identifier('x')])
+		AnalyzerVisitor(self.ctx).visit(self.ast)
+
 	def test_built_in_constant_error(self):
 		self.ast.target = FunCall(Identifier('f'), [Identifier('x'), Identifier('pi')])
 		self.ast.value = BinaryOp(Identifier('x'), '*', Identifier('pi'))

@@ -15,6 +15,13 @@ class TestContext(unittest.TestCase):
 		m = Matrix([[4, 3], [1, 1]])
 		self.assertEqual(inv(m), Matrix([[1, -3], [-1, 4]]))
 
+	def test_builtin_transpose(self):
+		transpose = self.ctx.get_function('transpose')
+		with self.assertRaises(TypeError):
+			transpose(42)
+		m = Matrix([[1, 2], [3, 4]])
+		self.assertEqual(transpose(m), Matrix([[1, 3], [2, 4]]))
+
 	def test_get_all_symbols(self):
 		self.assertIsInstance(self.ctx.get_all_symbols(), set)
 
