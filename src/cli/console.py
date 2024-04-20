@@ -1,7 +1,8 @@
 import os, readline, sys
 from src.ast import Ast, RenderVisitor
 from src.cli import Completer
-from src.interpreter import AnalyzerVisitor, Context, EvaluatorVisitor, InterpreterErrorGroup
+from src.interpreter import AnalyzerVisitor, Context, EvaluatorVisitor, InterpreterErrorGroup, \
+	RemovedFunctionError
 from src.parser import parse
 
 class Console():
@@ -17,11 +18,41 @@ class Console():
 				pass
 		self.ctx = Context()
 
+	colors = {
+		'black': '\033[30m',
+		'red': '\033[31m',
+		'green': '\033[32m',
+		'yellow': '\033[33m',
+		'blue': '\033[34m',
+		'magenta': '\033[35m',
+		'cyan': '\033[36m',
+		'white': '\033[37m',
+		'bright_black': '\033[90m',
+		'bright_red': '\033[91m',
+		'bright_green': '\033[92m',
+		'bright_yellow': '\033[93m',
+		'bright_blue': '\033[94m',
+		'bright_magenta': '\033[95m',
+		'bright_cyan': '\033[96m',
+		'bright_white': '\033[97m',
+		'end': '\033[0m'
+	}
+
 	def _exec(self, ast: Ast):
 		AnalyzerVisitor(self.ctx).visit(ast)
 		ast = EvaluatorVisitor(self.ctx).visit(ast)
 		if ast:
 			print(RenderVisitor().visit(ast))
+
+	def _print_errors(self, errors: list):
+		for err in errors:
+			if isinstance(err, RemovedFunctionError):
+				color = Console.colors['bright_magenta']
+				etype= 'warning'
+			else:
+				color = Console.colors['bright_red']
+				etype = 'error'
+			print(f"{color}{etype}:{Console.colors['end']} {err}")
 
 	def _save_history(self):
 		if self.histfile:
@@ -57,13 +88,11 @@ class Console():
 			except EOFError:
 				continue
 			except InterpreterErrorGroup as e:
-				for i in e.errors:
-					print(i)
+				self._print_errors(e.errors)
 			except Exception as e:
-				if isinstance(e.args[0],list):
-					for i in e.args[0]:
-						print(i)
+				if len(e.args) and isinstance(e.args[0], list):
+					self._print_errors(e.args[0])
 				else:
-					print(e)
+					self._print_errors([e.args[0]])
 			buf = ''
 		self._save_history()

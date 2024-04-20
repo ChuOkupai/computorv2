@@ -41,7 +41,7 @@ class InvalidArgumentsLengthError(InterpreterError):
 
 class InvalidCommandError(InterpreterError):
 	def __init__(self, cmd: str):
-		super().__init__(None, f"invalid command {cmd}")
+		super().__init__(None, f"{cmd}: invalid command")
 
 class InvalidPolynomialDegreeError(InterpreterError):
 	def __init__(self, degree: int):
