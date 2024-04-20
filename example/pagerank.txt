@@ -1,0 +1,23 @@
+# This file tests the PageRank algorithm on a small graph in Computer v2.
+# Source: https://pi.math.cornell.edu/~mec/Winter2009/RalucaRemus/Lecture3/lecture3.html
+
+# The graph is represented by the following adjacency matrix:
+A = [
+	[0, 0, 1, 1 / 2];
+	[1 / 3, 0, 0, 0];
+	[1 / 3, 1 / 2, 0, 1 / 2];
+	[1 / 3, 1 / 2, 0, 0]
+]
+
+# The initial vector is a uniform distribution
+v = ones(4, 1) / 4
+
+# Compute the PageRank for the i-th iteration
+PR(iteration) = A ^ iteration ** v
+
+PR(1) # First iteration
+PR(2) # Second iteration
+
+# And so on...
+
+PR(100) # 100th iteration

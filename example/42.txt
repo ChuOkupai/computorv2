@@ -1,0 +1,19 @@
+# This file contains some methods to compute the number 42 in Computor v2.
+
+# Compute 42
+42
+
+# Compute 42 by adding 1 to 41
+41 + 1
+
+# Compute 42 by multiplying 6 by 7
+6 * 7
+
+# Compute 42 by dividing 84 by 2
+84 / 2
+
+# Compute 42 by taking the square root of 1764
+sqrt(1764)
+
+# Compute 42 by taking 99 modulo 57
+99 % 57

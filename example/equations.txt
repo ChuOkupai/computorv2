@@ -1,0 +1,13 @@
+# This file demonstrates how to solve equations in Computor v2.
+
+# Solve an equation with infinite solutions
+5 = 5 ?
+
+# Solve an impossible equation
+5 = 6 ?
+
+# Solve a linear equation
+6x = 12 ?
+
+# Solve a quadratic equation
+X^2 + 5X + 6 = 0 ?
