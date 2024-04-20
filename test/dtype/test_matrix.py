@@ -173,9 +173,14 @@ class TestMatrix(unittest.TestCase):
 		m = Matrix([[1., 2.], [3., 4.]])
 		self.assertEqual(m ** 0, Matrix.identity(2))
 		self.assertEqual(Matrix([[1, 2], [3, 4]]) ** 0, Matrix.identity(2, dtype=int))
-		self.assertEqual(Matrix([[Complex(1, 2), Complex(3, 4)], [Complex(5, 6), Complex(7, 8)]]) ** 0, Matrix.identity(2, dtype=Complex))
+		self.assertEqual(Matrix([[Complex(1, 2), Complex(3, 4)],
+			[Complex(5, 6), Complex(7, 8)]]) ** 0, Matrix.identity(2, dtype=Complex))
 		self.assertEqual(m ** 1, m)
 		self.assertEqual(m ** 2, m.matmul(m))
+		m = Matrix([[0.4, 0.6], [0.8, 0.2]]) ** 111
+		m.values = [[round(x, 2) for x in r] for r in m.values]
+		m2 = Matrix([[0.57, 0.43], [0.57, 0.43]])
+		self.assertEqual(m, m2)
 
 	def test_pow_invalid_shape(self):
 		m = Matrix([[1., 2.], [3., 4.], [5., 6.]])

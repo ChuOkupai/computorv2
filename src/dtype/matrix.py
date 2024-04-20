@@ -126,9 +126,14 @@ class Matrix:
 			raise ValueError('exponent must be non-negative.')
 		if m == 0:
 			return Matrix.identity(self.rows(), dtype=type(self.values[0][0]))
-		if m == 1:
-			return self
-		return self.matmul(self ** (m - 1))
+		r = self
+		res = Matrix.identity(self.rows(), dtype=type(self.values[0][0]))
+		while m > 0:
+			if m % 2:
+				res = res.matmul(r)
+			r = r.matmul(r)
+			m //= 2
+		return res
 
 	def __radd__(self, m):
 		return self + m
