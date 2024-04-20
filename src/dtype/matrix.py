@@ -1,5 +1,6 @@
 from copy import deepcopy
-from src.dtype import Complex, is_close, is_literal
+import src.dtype.complex as dtype
+import src.dtype.utils as utils
 
 class Matrix:
 	pass
@@ -30,11 +31,11 @@ class Matrix:
 	def __init__(self, values: list):
 		if any(len(x) != len(values[0]) for x in values):
 			raise self.InvalidShapeError
-		if not is_literal(values[0][0]):
+		if not utils.is_literal(values[0][0]):
 			raise ValueError('all elements in the matrix must be literals.')
 		if any(any(not isinstance(y, type(values[0][0])) for y in x) for x in values):
-			if any(any(isinstance(y, Complex) for y in x) for x in values):
-				values = [[x if isinstance(x, Complex) else Complex(x) for x in r] for r in
+			if any(any(isinstance(y, dtype.Complex) for y in x) for x in values):
+				values = [[x if isinstance(x, dtype.Complex) else dtype.Complex(x) for x in r] for r in
 					values]
 			else:
 				raise ValueError('all elements in the matrix must be of the same type.')
@@ -96,7 +97,7 @@ class Matrix:
 	def __eq__(self, m):
 		if not isinstance(m, Matrix) or self.shape != m.shape:
 			return False
-		return all(all(is_close(x, y) for x, y in zip(r1, r2)) for r1, r2 in zip(self.values, m.values))
+		return all(all(utils.is_close(x, y) for x, y in zip(r1, r2)) for r1, r2 in zip(self.values, m.values))
 
 	def __mod__(self, m):
 		return self._do_op(m, lambda x, y: x % y)

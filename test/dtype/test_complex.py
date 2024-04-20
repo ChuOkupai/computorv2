@@ -1,5 +1,5 @@
 import unittest
-from src.dtype import Complex
+from src.dtype import Complex, Matrix
 
 class TestComplex(unittest.TestCase):
 	'''This class contains tests for the Complex class.'''
@@ -22,6 +22,11 @@ class TestComplex(unittest.TestCase):
 		self.assertEqual(str(Complex(1, 2) + 3), '4 + 2i')
 		self.assertEqual(str(Complex(1, 2) + 1.5), '2.5 + 2i')
 
+	def test_add_matrix(self):
+		c = Complex(1, 2)
+		m = Matrix([[1, 2], [3, 4]])
+		self.assertEqual(str(c + m), '[[2 + 2i, 3 + 2i]; [4 + 2i, 5 + 2i]]')
+
 	def test_eq(self):
 		self.assertEqual(Complex(1, 2), Complex(1, 2))
 		self.assertEqual(Complex(1, 0), 1)
@@ -34,6 +39,11 @@ class TestComplex(unittest.TestCase):
 		self.assertEqual(str(Complex(1, 2) * Complex(3, 4)), '-5 + 10i')
 		self.assertEqual(str(Complex(1, 2) * 3), '3 + 6i')
 		self.assertEqual(str(Complex(1, 2) * 1.5), '1.5 + 3i')
+
+	def test_mul_matrix(self):
+		c = Complex(1, 2)
+		m = Matrix([[1, 2], [3, 4]])
+		self.assertEqual(str(c * m), '[[1 + 2i, 2 + 4i]; [3 + 6i, 4 + 8i]]')
 
 	def test_ne(self):
 		self.assertNotEqual(Complex(1, 0), Complex(2, 0))
@@ -109,6 +119,11 @@ class TestComplex(unittest.TestCase):
 		self.assertEqual(str(Complex(1, 2) - Complex(3, 4)), '-2 - 2i')
 		self.assertEqual(str(Complex(1, 2) - 3), '-2 + 2i')
 		self.assertEqual(str(Complex(1, 2) - 1.5), '-0.5 + 2i')
+
+	def test_sub_matrix(self):
+		c = Complex(1, 2)
+		m = Matrix([[1, 2], [3, 4]])
+		self.assertEqual(str(c - m), '[[2i, -1 + 2i]; [-2 + 2i, -3 + 2i]]')
 
 	def test_truediv(self):
 		self.assertEqual(str(Complex(1, 2) / Complex(3, 4)), '0.44 + 0.08i')

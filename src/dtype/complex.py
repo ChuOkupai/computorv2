@@ -1,4 +1,5 @@
 from math import atan2, cos, exp, hypot, log, sin, sqrt
+import src.dtype.matrix as dtype
 import src.dtype.utils as utils
 
 class Complex:
@@ -21,8 +22,11 @@ class Complex:
 	def __abs__(self):
 		return sqrt(self.real ** 2 + self.imag ** 2)
 
-	@implicit_conversion
 	def __add__(self, c):
+		if isinstance(c, dtype.Matrix):
+			return c + self
+		if not isinstance(c, Complex):
+			c = Complex(c)
 		return Complex(self.real + c.real, self.imag + c.imag)
 
 	def __eq__(self, c):
@@ -32,8 +36,11 @@ class Complex:
 			return self.real == c and self.imag == 0
 		return False
 
-	@implicit_conversion
 	def __mul__(self, c):
+		if isinstance(c, dtype.Matrix):
+			return c * self
+		if not isinstance(c, Complex):
+			c = Complex(c)
 		a, b, c, d = self.real, self.imag, c.real, c.imag
 		return Complex(a * c - b * d, a * d + b * c)
 
@@ -100,8 +107,11 @@ class Complex:
 		i = abs(i)
 		return f"{r}{sign}{i if i != 1 else ''}i"
 
-	@implicit_conversion
 	def __sub__(self, c):
+		if isinstance(c, dtype.Matrix):
+			return -c + self
+		if not isinstance(c, Complex):
+			c = Complex(c)
 		return Complex(self.real - c.real, self.imag - c.imag)
 
 	@implicit_conversion
