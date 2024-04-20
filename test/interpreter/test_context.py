@@ -152,3 +152,8 @@ class TestContext(unittest.TestCase):
 		self.ctx.set_function('f', None)
 		self.ctx.unset_function('f')
 		self.assertIsNone(self.ctx.get_function('f'))
+
+	def test_unset_variable(self):
+		self.ctx.set_variable('y', 42)
+		self.ctx.unset_variable('y')
+		self.assertIsNone(self.ctx.get_variable('y'))

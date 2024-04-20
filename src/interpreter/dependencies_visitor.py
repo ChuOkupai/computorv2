@@ -26,6 +26,9 @@ class DependenciesVisitor(Visitor):
 		self.visit(binop.left)
 		self.visit(binop.right)
 
+	def visit_command(self, _):
+		pass
+
 	def visit_constant(self, _):
 		pass
 

@@ -63,6 +63,12 @@ class TestParser(unittest.TestCase):
 		self.assertEqual(repr(parse('funA(x) = y ?')),
 			"Solve(Assign(FunCall(Identifier('funa'), [Identifier('x')]), Identifier('y')))")
 
+	def test_command(self):
+		self.assertEqual(repr(parse('% foo')), "Command(['foo'])")
+
+	def test_command_args(self):
+		self.assertEqual(repr(parse('% foo bar baz')), "Command(['foo', 'bar', 'baz'])")
+
 	def test_invalid_variable(self):
 		with self.assertRaises(SyntaxError):
 			parse('_var = 2')

@@ -1,5 +1,6 @@
 import unittest
-from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
+from src.ast import Assign, BinaryOp, Command, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp
 from src.dtype import Matrix
 from src.interpreter import Context, EvaluatorVisitor, FunctionStorage, InterpreterErrorGroup
 
@@ -65,6 +66,10 @@ class TestEvaluatorVisitor(unittest.TestCase):
 		ast = BinaryOp(Constant(6), '*', Constant(7))
 		self.ev.visit(ast)
 		self._assert_constant_eq(self.ev.res, 42)
+
+	def test_command(self):
+		ast = Command(['clear'])
+		self.ev.visit(ast)
 
 	def test_constant(self):
 		ast = Constant(9000)

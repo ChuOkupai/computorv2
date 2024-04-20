@@ -79,6 +79,9 @@ class AnalyzerVisitor(Visitor):
 		self._visit(binop.left)
 		self._visit(binop.right)
 
+	def visit_command(self, _):
+		pass
+
 	def visit_constant(self, _):
 		pass
 

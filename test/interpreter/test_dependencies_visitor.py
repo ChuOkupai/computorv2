@@ -1,5 +1,6 @@
 import unittest
-from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
+from src.ast import Assign, BinaryOp, Command, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp
 from src.interpreter.errors import *
 from src.interpreter import Context, FunctionStorage, DependenciesVisitor
 
@@ -105,3 +106,9 @@ class TestDependenciesVisitor(unittest.TestCase):
 		self.dv.visit(expr)
 		self.assertEqual(self.dv.visited_functions, {'f'})
 		self.assertEqual(self.dv.visited_variables, {'x'})
+
+	def test_command(self):
+		expr = Command(['foo', 'bar'])
+		self.dv.visit(expr)
+		self.assertEqual(self.dv.visited_functions, set())
+		self.assertEqual(self.dv.visited_variables, set())

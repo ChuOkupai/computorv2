@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
+from src.ast import Assign, BinaryOp, Command, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp
 
 class Visitor(ABC):
 	"""Represents a visitor for the AST."""
@@ -10,6 +11,10 @@ class Visitor(ABC):
 
 	@abstractmethod
 	def visit_binaryop(self, binop: BinaryOp) -> None:
+		pass
+
+	@abstractmethod
+	def visit_command(self, cmd: Command) -> None:
 		pass
 
 	@abstractmethod

@@ -55,6 +55,9 @@ class PolynomialVisitor(Visitor):
 			return
 		raise InvalidPolynomialError
 
+	def visit_command(self, _):
+		raise InvalidPolynomialError
+
 	def visit_constant(self, constant: Constant):
 		if not isinstance(constant.value, (int, float)):
 			raise InvalidPolynomialError

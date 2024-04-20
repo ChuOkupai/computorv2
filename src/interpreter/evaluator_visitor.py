@@ -1,9 +1,10 @@
 from copy import deepcopy
-from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
-	UnaryOp, Visitor
+from src.ast import Assign, Ast, BinaryOp, Command, Constant, FunCall, Identifier, MatDecl, \
+	Solve, UnaryOp, Visitor
 from src.dtype import Matrix
 from src.interpreter import Context, DependenciesVisitor, EquationSolverFactory, \
-	FunctionStorage, InterpreterErrorGroup, PolynomialVisitor, RemovedFunctionError
+	FunctionStorage, InterpreterErrorGroup, PolynomialVisitor, RemovedFunctionError, \
+	SystemCommandFactory
 
 def catch_exception(func):
 	def wrapped(self, *args, **kwargs):
@@ -62,6 +63,10 @@ class EvaluatorVisitor(Visitor):
 			self.res = Constant(bop.evaluate(bop.left.value, bop.right.value))
 		else:
 			self.res = bop
+
+	def visit_command(self, cmd: Command):
+		self.res = None
+		SystemCommandFactory.create(self.ctx, cmd.args).execute()
 
 	def visit_constant(self, constant: Constant):
 		self.res = constant

@@ -93,3 +93,6 @@ class Context:
 
 	def unset_function(self, id: str):
 		self.functions.pop(id)
+
+	def unset_variable(self, id: str):
+		self.scopes[-1].variables.pop(id)

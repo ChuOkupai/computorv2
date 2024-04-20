@@ -57,6 +57,9 @@ class TestAst(unittest.TestCase):
 		self.assertTrue(BinaryOp(None, '*', None).get_precedence() > BinaryOp(None, '**', None).get_precedence())
 		self.assertTrue(BinaryOp(None, '**', None).get_precedence() > BinaryOp(None, '+', None).get_precedence())
 
+	def test_command(self):
+		self.assertEqual(repr(Command(['foo', 'bar'])),"Command(['foo', 'bar'])")
+
 	def test_constant(self):
 		self.assertEqual(repr(Constant(1)), "Constant(1)")
 		self.assertEqual(repr(Constant(1.5)), "Constant(1.5)")

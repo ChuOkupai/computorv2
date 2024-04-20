@@ -16,7 +16,8 @@ precedence_dict = { token: i for i, e in enumerate(precedence) for token in e[1:
 def p_statement(p):
 	'''statement : eval
 		| assign
-		| solve'''
+		| solve
+		| cmd'''
 	p[0] = p[1]
 
 def p_eval(p):
@@ -105,6 +106,23 @@ def p_assign(p):
 def p_solve(p):
 	'''solve : assign QMARK'''
 	p[0] = ast.Solve(p[1])
+
+def p_cmd(p):
+	'''cmd : MOD cmd_args'''
+	p[0] = ast.Command(p[2])
+
+def p_cmd_args(p):
+	'''cmd_args : cmd_arg'''
+	p[0] = [p[1]]
+
+def p_cmd_args_append(p):
+	'''cmd_args : cmd_args cmd_arg'''
+	p[0] = p[1]
+	p[0].append(p[2])
+
+def p_cmd_arg(p):
+	'''cmd_arg : ID'''
+	p[0] = p[1]
 
 # Error rule for syntax errors
 def p_error(p):

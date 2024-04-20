@@ -1,5 +1,6 @@
 import unittest
-from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
+from src.ast import Assign, BinaryOp, Command, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp
 from src.interpreter.errors import *
 from src.interpreter import Context, FunctionStorage, AnalyzerVisitor
 
@@ -110,3 +111,6 @@ class TestAnalyzerVisitor(unittest.TestCase):
 		self.ast.value = FunCall(Identifier('g'), [BinaryOp(Identifier('x'), '+', Identifier('z'))])
 		self._assert_errors_raised([RequireIdentifierError, MultipleDeclarationError,
 			UndefinedFunctionError, UndefinedVariableError, UnusedParameterError])
+
+	def test_command(self):
+		AnalyzerVisitor(self.ctx).visit(Command(['foo', 'bar']))

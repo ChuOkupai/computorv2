@@ -26,6 +26,8 @@ class Console():
 		AnalyzerVisitor(self.ctx).visit(ast)
 		print('---> AST Evaluator')
 		ast = EvaluatorVisitor(self.ctx).visit(ast)
+		if not ast:
+			return
 		print('---> Result')
 		print(repr(ast))
 		print(RenderVisitor().visit(ast))

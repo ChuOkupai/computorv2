@@ -1,5 +1,11 @@
 from src.ast import Identifier
 
+class CommandError(RuntimeError):
+	"""Runtime error for commands."""
+
+	def __init__(self, cmd: str, message: str):
+		super().__init__(f"{cmd}: {message}.")
+
 class InterpreterError(RuntimeError):
 	"""Base class for exceptions in the interpreter."""
 
@@ -32,6 +38,10 @@ class InvalidArgumentsLengthError(InterpreterError):
 	def __init__(self, scope_id: str, expected: int, got: int):
 		plural = 's' if expected > 1 else ''
 		super().__init__(scope_id, f"expected {expected} argument{plural}, got {got}")
+
+class InvalidCommandError(InterpreterError):
+	def __init__(self, cmd: str):
+		super().__init__(None, f"invalid command {cmd}")
 
 class InvalidPolynomialDegreeError(InterpreterError):
 	def __init__(self, degree: int):

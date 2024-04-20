@@ -1,5 +1,5 @@
-from src.ast import Assign, Ast, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, \
-	UnaryOp, Visitor
+from src.ast import Assign, Ast, BinaryOp, Command, Constant, FunCall, Identifier, MatDecl, \
+	Solve, UnaryOp, Visitor
 
 class RenderVisitor(Visitor):
 	"""This visitor that renders the AST using the minimum amount of parentheses possible."""
@@ -37,6 +37,9 @@ class RenderVisitor(Visitor):
 			and isinstance(binop.right, Identifier)):
 			self.res += ' ' + binop.op + ' '
 		self._render_grouped(binop.right, right_parentheses)
+
+	def visit_command(self, cmd: Command):
+		self.res += '% ' + ' '.join(cmd.args)
 
 	def visit_constant(self, constant: Constant):
 		self.res += str(constant.value)

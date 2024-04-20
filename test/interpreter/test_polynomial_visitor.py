@@ -1,5 +1,6 @@
 import unittest
-from src.ast import Assign, BinaryOp, Constant, FunCall, Identifier, MatDecl, Solve, UnaryOp
+from src.ast import Assign, BinaryOp, Command, Constant, FunCall, Identifier, MatDecl, Solve, \
+	UnaryOp
 from src.dtype import Complex, Polynomial
 from src.interpreter import InvalidPolynomialError, PolynomialVisitor
 
@@ -10,6 +11,10 @@ class TestPolynomialVisitor(unittest.TestCase):
 		ast = Solve(Assign(left_polynomial, right_polynomial))
 		pv = PolynomialVisitor()
 		return pv.visit(ast)
+
+	def test_command(self):
+		with self.assertRaises(InvalidPolynomialError):
+			self._test_ast(Command(['foo', 'bar']), Constant(0))
 
 	def test_const(self):
 		p = self._test_ast(Constant(42), Constant(0))

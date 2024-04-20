@@ -22,6 +22,9 @@ class TestRenderVisitor(unittest.TestCase):
 		self.assertEqual(R().visit(BinaryOp(Constant(1), '^', Constant(2))), '1 ^ 2')
 		self.assertEqual(R().visit(BinaryOp(Constant(1), '-', Constant(2))), '1 - 2')
 
+	def test_command(self):
+		self.assertEqual(R().visit(Command(['foo', 'bar'])), '% foo bar')
+
 	def test_constant(self):
 		self.assertEqual(R().visit(Constant(1)), '1')
 		self.assertEqual(R().visit(Constant(1.5)), '1.5')

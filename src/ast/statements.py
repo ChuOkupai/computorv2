@@ -13,6 +13,18 @@ class Assign(Ast):
 	def __repr__(self):
 		return f"{self.__class__.__name__}({repr(self.target)}, {repr(self.value)})"
 
+class Command(Ast):
+	"""Represents a command statement."""
+
+	def __init__(self, args: list):
+		self.args = args
+
+	def accept(self, visitor):
+		return visitor.visit_command(self)
+
+	def __repr__(self):
+		return f"{self.__class__.__name__}({repr(self.args)})"
+
 class FunCall(Ast):
 	"""Represents a function call statement."""
 
