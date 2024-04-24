@@ -1,7 +1,8 @@
 import os
 from abc import ABC, abstractmethod
 from src.ast import RenderVisitor
-from src.interpreter import CommandError, Context, InvalidCommandError
+from src.interpreter import CommandError, Context, InterpreterErrorGroup, InvalidCommandError, \
+	RemovedFunctionError
 
 class SystemCommand(ABC):
 	"""Abstract class for system commands."""
@@ -30,6 +31,14 @@ class DeleteCommand(SystemCommand):
 	def __init__(self, ctx: Context, args: list):
 		super().__init__(ctx, args)
 
+	def _remove_functions_with_dependecy(self, dep_id: str):
+		errors = []
+		for id in self.ctx.get_functions_using_dependency(dep_id):
+			errors += self._remove_functions_with_dependecy(id)
+			errors.append(RemovedFunctionError(id, dep_id))
+		self.ctx.unset_function(dep_id)
+		return errors
+
 	def execute(self):
 		if len(self.args) != 2:
 			raise CommandError('delete', 'invalid number of arguments')
@@ -39,7 +48,9 @@ class DeleteCommand(SystemCommand):
 				raise CommandError('delete', f'cannot delete built-in function: {name}')
 			if not self.ctx.get_function(name):
 				raise CommandError('delete', f'undefined function: {name}')
-			self.ctx.unset_function(name)
+			errors = self._remove_functions_with_dependecy(name)
+			if errors:
+				raise InterpreterErrorGroup(errors)
 		elif id_type == 'variable':
 			if self.ctx.is_constant(name):
 				raise CommandError('delete', f'cannot delete built-in variable: {name}')

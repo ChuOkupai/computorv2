@@ -23,6 +23,14 @@ class EvaluatorVisitor(Visitor):
 		self.res = None
 		self.expand_functions = True
 
+	def _remove_functions_with_dependecy(self, dep_id: str):
+		errors = []
+		for id in self.ctx.get_functions_using_dependency(dep_id):
+			errors += self._remove_functions_with_dependecy(id)
+			errors.append(RemovedFunctionError(id, dep_id))
+		self.ctx.unset_function(dep_id)
+		return errors
+
 	@catch_exception
 	def visit(self, node: Ast):
 		node.accept(self)
@@ -43,17 +51,15 @@ class EvaluatorVisitor(Visitor):
 			self.ctx.pop_scope()
 			dv = DependenciesVisitor(self.ctx)
 			dv.visit(self.res)
-			old_dependencies = set()
-			fs = self.ctx.get_function(id)
-			if fs and len(fs.args) != len(target.args):
-				old_dependencies = self.ctx.get_functions_using_dependency(id)
 			fs = FunctionStorage(target.args, self.res, dv.get_user_defined_functions())
+			errors = []
+			old_fs = self.ctx.get_function(id)
+			if old_fs and len(old_fs.args) != len(target.args):
+				errors = self._remove_functions_with_dependecy(id)
 			self.ctx.set_function(id, fs)
 			self.expand_functions = old_expand_functions
-			[self.ctx.unset_function(dep) for dep in old_dependencies]
-			old_dependencies = [RemovedFunctionError(dep, id) for dep in old_dependencies]
-			if old_dependencies:
-				raise InterpreterErrorGroup(old_dependencies)
+			if errors:
+				raise InterpreterErrorGroup(errors)
 
 	def visit_binaryop(self, bop: BinaryOp):
 		bop.left = self.visit(bop.left)

@@ -145,6 +145,23 @@ class TestEvaluatorVisitor(unittest.TestCase):
 		with self.assertRaises(InterpreterErrorGroup):
 			self.ev.visit(ast)
 
+	def test_reassign_function_nested(self):
+		ast = Assign(FunCall(Identifier('g'), [Identifier('x')]),
+			FunCall(Identifier('f'), [Identifier('x')]))
+		self.ev.visit(ast)
+		ast = Assign(FunCall(Identifier('h'), [Identifier('x')]),
+			FunCall(Identifier('g'), [Identifier('x')]))
+		self.ev.visit(ast)
+		for name in ['f', 'g', 'h']:
+			self.assertIsNotNone(self.ctx.get_function(name))
+		ast = Assign(FunCall(Identifier('f'), [Identifier('x'), Identifier('y')]),
+			BinaryOp(Identifier('x'), '+', Identifier('y')))
+		with self.assertRaises(InterpreterErrorGroup):
+			self.ev.visit(ast)
+		self.assertIsNotNone(self.ctx.get_function('f'))
+		for name in ['g', 'h']:
+			self.assertIsNone(self.ctx.get_function(name))
+
 	def test_solve(self):
 		ast = Solve(Assign(BinaryOp(Identifier('x'), '+', Constant(1)), Constant(8)))
 		self.assertEqual(repr(self.ev.visit(ast)), "Constant(7)")

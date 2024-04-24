@@ -1,7 +1,7 @@
 import unittest
 from src.ast import *
 from src.interpreter import ClearCommand, CommandError, Context, DeleteCommand, FunctionStorage, \
-	HelpCommand, InvalidCommandError, ShowCommand, SystemCommandFactory
+	HelpCommand, InterpreterErrorGroup, InvalidCommandError, ShowCommand, SystemCommandFactory
 
 class TestSystemCommands(unittest.TestCase):
 	"""This class tests the SystemCommandFactory class and its subclasses."""
@@ -22,6 +22,15 @@ class TestSystemCommands(unittest.TestCase):
 		self.ctx.set_function('f', FunctionStorage([], []))
 		DeleteCommand(self.ctx, ['function', 'f']).execute()
 		self.assertIsNone(self.ctx.get_function('f'))
+
+	def test_delete_function_with_dependency(self):
+		self.ctx.set_function('f', FunctionStorage([Identifier('x')], Identifier('x')))
+		self.ctx.set_function('g', FunctionStorage([Identifier('x')],
+			FunCall('f', [Identifier('x')]), {'f'}))
+		with self.assertRaises(InterpreterErrorGroup):
+			DeleteCommand(self.ctx, ['function', 'f']).execute()
+		self.assertIsNone(self.ctx.get_function('f'))
+		self.assertIsNone(self.ctx.get_function('g'))
 
 	def test_delete_function_builtin(self):
 		with self.assertRaises(CommandError):
