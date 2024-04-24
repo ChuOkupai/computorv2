@@ -1,0 +1,19 @@
+# This file shows how Computor v2 deals with function dependencies
+
+# This is a simple function that returns the square of a number
+f(x) = x^2
+
+# This function uses the previous one
+g(x) = f(x) + 1
+
+# This function uses the previous one
+h(x) = 2 * g(x)
+
+# Prints all functions stored in memory
+%show functions
+
+# Computes the value of h(3)
+h(3)
+
+# By removing the function f, g and h are no longer valid
+%delete function f

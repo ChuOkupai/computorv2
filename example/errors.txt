@@ -1,0 +1,25 @@
+# This file shows various examples of possible errors using Computor v2
+
+# Division by zero
+123 / 0
+
+# Matrix at negative power
+[[1, 2]; [3, 4]] ^ -1
+
+# Expression to expression assignment
+42 = -42
+
+# Assignment with unknown function
+x = 8 * foo(2)
+
+# Assignment with unknown variable
+y = 8 * x
+
+# Function declaration with unknown variable
+f(x) = x * y
+
+# Function declaration with unused parameter
+f(x, y) = x - 1
+
+# Function declaration with cyclic dependency
+f(x) = -f(x)
