@@ -1,0 +1,13 @@
+4
+12
+[91merror:[0m division by zero
+2.5
+77
+2
+4
+2i
+-4 + 0i
+[[2, 3]; [3, 4]]
+[[1.0, 0.0]; [0.0, 1.0]]
+[[2.0, 3.0]; [3.0, 4.0]]
+[91merror:[0m exponent must be non-negative.

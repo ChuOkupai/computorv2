@@ -52,14 +52,14 @@ class Console():
 			else:
 				color = Console.colors['bright_red']
 				etype = 'error'
-			print(f"{color}{etype}:{Console.colors['end']} {err}")
+			print(f"{color}{etype}:{Console.colors['end']} {err}", file=sys.stderr)
 
 	def _save_history(self):
 		if self.histfile:
 			try:
 				readline.write_history_file(self.histfile)
 			except Exception as e:
-				print('error saving history:', e, file=sys.stderr)
+				self._print_errors([e.args[0]])
 
 	def _update_completer(self):
 		completer = Completer(self.ctx.get_all_symbols())

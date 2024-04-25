@@ -1,0 +1,6 @@
+M = identity(3)
+M ^ 1000
+3 * M - 1
+
+sqrt(2)
+log(e)

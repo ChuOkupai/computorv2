@@ -1,0 +1,7 @@
+[91merror:[0m syntax error near unexpected token '=' on line 1
+[91merror:[0m variable wrong123 is not defined.
+[91merror:[0m cannot assign to an expression.
+[91merror:[0m variable g is not defined.
+[91merror:[0m syntax error near unexpected token '=' on line 1
+[91merror:[0m syntax error near unexpected token '1' on line 1
+[91merror:[0m i is a built-in constant.
